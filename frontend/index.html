@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>JourneyPlay — Travel + Entertainment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script>
+// API Configuration
+const API_BASE = 'http://localhost:5000/api';
+
+// Update mock data fetching to use backend API
+async function fetchRoutesFromBackend() {
+  try {
+    const response = await fetch(`${API_BASE}/journeys`);
+    if (response.ok) return await response.json();
+  } catch (e) {
+    console.log('Backend not available, using mock data');
+  }
+  return null;
+}
+
+async function fetchBundlesFromBackend() {
+  try {
+    const response = await fetch(`${API_BASE}/bundles`);
+    if (response.ok) return await response.json();
+  } catch (e) {
+    console.log('Backend not available, using mock data');
+  }
+  return null;
+}
+
+async function createBooking(bookingData) {
+  try {
+    const response = await fetch(`${API_BASE}/bookings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bookingData)
+    });
+    return response.ok ? await response.json() : null;
+  } catch (e) {
+    console.error('Error creating booking:', e);
+    return null;
+  }
+}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#020817;--surface:#0f172a;--card:#1e293b;--card2:#162032;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --indigo:#6366f1;--violet:#8b5cf6;--teal:#14b8a6;--amber:#f59e0b;
+  --rose:#f43f5e;--green:#22c55e;
+  --text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+  --radius:16px;--radius-sm:10px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;overflow-x:hidden;min-height:100vh}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--indigo);border-radius:2px}
+
+/* TYPOGRAPHY */
+.font-display{font-family:'Syne',sans-serif}
+h1,h2,h3{font-family:'Syne',sans-serif}
+
+/* NOISE */
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9998}
+
+/* ── PAGES ── */
+.page{display:none;min-height:100vh;padding-top:70px}
+.page.active{display:block}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:70px;
+  background:rgba(2,8,23,0.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 2rem}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;
+  background:linear-gradient(135deg,var(--indigo),var(--violet));
+  background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;cursor:pointer}
+.nav-links{display:flex;gap:0.25rem;list-style:none}
+.nav-links li a{padding:0.5rem 1rem;border-radius:8px;font-size:0.85rem;color:var(--text2);
+  text-decoration:none;transition:all .2s;cursor:pointer;display:block}
+.nav-links li a:hover,.nav-links li a.active{color:var(--text);background:rgba(255,255,255,0.06)}
+.nav-right{display:flex;gap:0.75rem;align-items:center}
+.nav-avatar{width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--indigo),var(--violet));
+  display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:600;cursor:pointer}
+.btn{padding:0.5rem 1.25rem;border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif;
+  cursor:pointer;transition:all .2s;border:none;font-weight:500}
+.btn-primary{background:linear-gradient(135deg,var(--indigo),var(--violet));color:#fff}
+.btn-primary:hover{opacity:0.88;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{background:rgba(255,255,255,0.06);color:var(--text)}
+.btn-lg{padding:0.75rem 2rem;font-size:1rem;border-radius:12px}
+.btn-teal{background:linear-gradient(135deg,#0d9488,var(--teal));color:#fff}
+.btn-teal:hover{opacity:0.88}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:500}
+.badge-indigo{background:rgba(99,102,241,.15);color:#a5b4fc;border:0.5px solid rgba(99,102,241,.3)}
+.badge-teal{background:rgba(20,184,166,.12);color:#5eead4;border:0.5px solid rgba(20,184,166,.25)}
+.badge-amber{background:rgba(245,158,11,.12);color:#fcd34d;border:0.5px solid rgba(245,158,11,.25)}
+.badge-rose{background:rgba(244,63,94,.12);color:#fda4af;border:0.5px solid rgba(244,63,94,.25)}
+.badge-green{background:rgba(34,197,94,.12);color:#86efac;border:0.5px solid rgba(34,197,94,.25)}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .25s}
+.card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.card-glass{background:rgba(30,41,59,0.6);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--radius)}
+
+/* ── INPUTS ── */
+input,select{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.9rem;padding:0.65rem 1rem;
+  outline:none;transition:border-color .2s,width .2s,box-shadow .25s,background .35s,width .2s;width:100%}
+input:focus,select:focus{border-color:var(--indigo)}
+input::placeholder{color:var(--text3)}
+select{
+  appearance:none;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  background:
+    linear-gradient(160deg, rgba(15,23,42,.78), rgba(30,41,59,.6)),
+    radial-gradient(120% 90% at 0% 0%, rgba(99,102,241,.16), transparent 58%),
+    radial-gradient(120% 80% at 100% 100%, rgba(20,184,166,.12), transparent 60%);
+  border:1px solid rgba(148,163,184,.28);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+  backdrop-filter:blur(8px);
+  padding-right:2.4rem;
+  background-image:
+    linear-gradient(160deg, rgba(15,23,42,.78), rgba(30,41,59,.6)),
+    radial-gradient(120% 90% at 0% 0%, rgba(99,102,241,.16), transparent 58%),
+    radial-gradient(120% 80% at 100% 100%, rgba(20,184,166,.12), transparent 60%),
+    linear-gradient(45deg, transparent 50%, #a5b4fc 50%),
+    linear-gradient(135deg, #a5b4fc 50%, transparent 50%);
+  background-position:
+    0 0,
+    0 0,
+    0 0,
+    calc(100% - 15px) calc(50% - 3px),
+    calc(100% - 10px) calc(50% - 3px);
+  background-size:
+    auto,
+    auto,
+    auto,
+    6px 6px,
+    6px 6px;
+  background-repeat:no-repeat;
+}
+select:hover{
+  border-color:rgba(99,102,241,.5);
+  box-shadow:0 8px 20px rgba(15,23,42,.28), inset 0 1px 0 rgba(255,255,255,.05);
+}
+select:focus{
+  border-color:rgba(99,102,241,.85);
+  box-shadow:0 0 0 3px rgba(99,102,241,.2), 0 10px 24px rgba(2,6,23,.34);
+  background-image:
+    linear-gradient(160deg, rgba(15,23,42,.88), rgba(30,41,59,.68)),
+    radial-gradient(120% 90% at 0% 0%, rgba(99,102,241,.24), transparent 58%),
+    radial-gradient(120% 80% at 100% 100%, rgba(20,184,166,.18), transparent 60%),
+    linear-gradient(45deg, transparent 50%, #c7d2fe 50%),
+    linear-gradient(135deg, #c7d2fe 50%, transparent 50%);
+}
+select option{
+  background-color:#ffffff;
+  color:#0f172a;
+}
+select option:checked,
+select option:hover,
+select option:focus{
+  background-color:#6366f1;
+  color:#ffffff;
+}
+.select-soft{
+  background:
+    linear-gradient(160deg, rgba(30,41,59,.72), rgba(51,65,85,.58)),
+    radial-gradient(120% 90% at 0% 0%, rgba(129,140,248,.2), transparent 58%),
+    radial-gradient(120% 80% at 100% 100%, rgba(45,212,191,.16), transparent 60%);
+  border:1px solid rgba(148,163,184,.34);
+}
+.select-soft:hover{
+  border-color:rgba(129,140,248,.58);
+  box-shadow:0 10px 24px rgba(15,23,42,.26), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.select-soft:focus{
+  border-color:rgba(129,140,248,.9);
+  box-shadow:0 0 0 3px rgba(129,140,248,.24), 0 12px 26px rgba(2,6,23,.36);
+}
+.select-native-menu{
+  color-scheme:dark;
+  background:
+    linear-gradient(160deg, rgba(15,23,42,.9), rgba(30,41,59,.8)),
+    radial-gradient(120% 90% at 0% 0%, rgba(99,102,241,.22), transparent 58%),
+    radial-gradient(120% 80% at 100% 100%, rgba(20,184,166,.18), transparent 60%);
+  color:#e2e8f0;
+  border:1px solid rgba(129,140,248,.45);
+  box-shadow:0 4px 16px rgba(2,6,23,.24);
+}
+.select-native-menu:hover{
+  border-color:rgba(129,140,248,.68);
+  box-shadow:0 0 0 2px rgba(99,102,241,.18), 0 10px 24px rgba(2,6,23,.3);
+}
+.select-native-menu:focus{
+  border-color:rgba(129,140,248,.95);
+  box-shadow:0 0 0 3px rgba(99,102,241,.26), 0 12px 26px rgba(2,6,23,.36);
+}
+.select-native-menu option{
+  background-color:#0f172a;
+  color:#f1f5f9;
+}
+.select-native-menu option:checked,
+.select-native-menu option:hover,
+.select-native-menu option:focus{
+  background-color:#4f46e5;
+  color:#ffffff;
+}
+label{font-size:0.78rem;color:var(--text2);margin-bottom:0.4rem;display:block;font-weight:400}
+
+/* ── GRID UTILITIES ── */
+.grid{display:grid}
+.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g6{grid-template-columns:repeat(6,1fr)}
+@media(max-width:1024px){.g6{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.g6,.g4,.g3,.g2{grid-template-columns:1fr}}
+.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.flex-wrap{flex-wrap:wrap}
+
+/* ── SECTION ── */
+.section{padding:5rem 2rem}
+.container{max-width:1280px;margin:0 auto;padding:0 1.5rem}
+.section-tag{font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--indigo);margin-bottom:.75rem}
+.section-title{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;letter-spacing:-.03em;line-height:1.1;margin-bottom:1rem}
+.section-sub{font-size:1rem;color:var(--text2);line-height:1.7;max-width:50ch}
+
+/* ── ANIM ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(99,102,241,.3)}50%{box-shadow:0 0 40px rgba(139,92,246,.5)}}
+
+.anim-fade{animation:fadeUp .5s ease both}
+.anim-float{animation:float 4s ease-in-out infinite}
+
+/* UTILITY CLASSES */
+.text-indigo{color:var(--indigo)}.text-teal{color:var(--teal)}.text-violet{color:var(--violet)}
+.text-amber{color:var(--amber)}.text-muted{color:var(--text2)}.text-faint{color:var(--text3)}
+.fw-700{font-weight:700}.fw-600{font-weight:600}.fw-500{font-weight:500}
+.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}
+.mt-6{margin-top:1.5rem}.mt-8{margin-top:2rem}.mt-12{margin-top:3rem}
+.mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}
+.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}
+.p-4{padding:1rem}.p-6{padding:1.5rem}.px-4{padding-left:1rem;padding-right:1rem}
+.text-sm{font-size:.85rem}.text-xs{font-size:.75rem}.text-lg{font-size:1.1rem}.text-xl{font-size:1.25rem}
+.rounded{border-radius:var(--radius-sm)}.rounded-lg{border-radius:var(--radius)}.rounded-full{border-radius:100px}
+.w-full{width:100%}.h-full{height:100%}
+.sep{height:1px;background:var(--border);margin:1.25rem 0}
+
+/* ADMIN */
+.kpi-card{position:relative;overflow:hidden}
+.kpi-card::after{content:'';position:absolute;right:-40px;top:-40px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.25),transparent 70%)}
+.kpi-title{font-size:.78rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.kpi-value{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:700;line-height:1.15}
+.kpi-delta{font-size:.8rem;color:var(--text2)}
+.admin-toolbar{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap}
+.admin-toolbar select{max-width:220px}
+.admin-grid-analytics{display:grid;grid-template-columns:2fr 1fr;gap:1rem}
+.admin-list{list-style:none;padding:0;margin:0;display:grid;gap:.55rem}
+.admin-list li{display:flex;justify-content:space-between;gap:.75rem;padding:.65rem .7rem;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:10px}
+.admin-feed{list-style:none;padding:0;margin:0;display:grid;gap:.6rem;max-height:290px;overflow:auto}
+.admin-feed li{padding:.7rem;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.02)}
+.bar-wrap{display:grid;gap:.55rem}
+.bar-row{display:grid;grid-template-columns:60px 1fr 72px;align-items:center;gap:.6rem}
+.bar-label{font-size:.78rem;color:var(--text3)}
+.bar-track{height:10px;background:#0b1323;border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--indigo),var(--teal));border-radius:999px}
+.bar-value{font-size:.78rem;color:var(--text2);text-align:right}
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:12px}
+.table{width:100%;border-collapse:collapse;min-width:720px}
+.table th,.table td{padding:.7rem .75rem;border-bottom:1px solid var(--border);font-size:.86rem;text-align:left}
+.table th{font-size:.78rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;background:rgba(255,255,255,.02)}
+.table tr:hover td{background:rgba(255,255,255,.02)}
+.status-pill{padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:600;display:inline-block}
+.status-confirmed{background:rgba(34,197,94,.14);color:#86efac;border:1px solid rgba(34,197,94,.3)}
+.status-pending{background:rgba(245,158,11,.14);color:#fcd34d;border:1px solid rgba(245,158,11,.3)}
+.status-cancelled{background:rgba(244,63,94,.14);color:#fda4af;border:1px solid rgba(244,63,94,.3)}
+.status-active{background:rgba(20,184,166,.14);color:#5eead4;border:1px solid rgba(20,184,166,.3)}
+.status-suspended{background:rgba(244,63,94,.14);color:#fda4af;border:1px solid rgba(244,63,94,.3)}
+.bundle-chip-row{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.75rem}
+.bundle-chip{padding:3px 8px;border-radius:999px;font-size:.72rem;border:1px solid var(--border2);background:rgba(255,255,255,.03);color:var(--text2)}
+.bundle-partner{font-size:.76rem;color:var(--text2);line-height:1.5;margin-top:.5rem}
+.partner-logo-row{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.45rem}
+.partner-logo{padding:3px 8px;border-radius:999px;font-size:.7rem;border:1px solid var(--border2);background:rgba(99,102,241,.08);color:#c7d2fe}
+.reco-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:.72rem;font-weight:600}
+.reco-high{background:rgba(34,197,94,.16);color:#86efac;border:1px solid rgba(34,197,94,.35)}
+.reco-mid{background:rgba(245,158,11,.16);color:#fcd34d;border:1px solid rgba(245,158,11,.35)}
+.reco-low{background:rgba(244,63,94,.14);color:#fda4af;border:1px solid rgba(244,63,94,.35)}
+.bundle-selected{border-color:rgba(20,184,166,.7)!important;box-shadow:0 0 0 1px rgba(20,184,166,.3) inset}
+.bundles-shell{
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(20,184,166,.12), transparent 55%),
+    radial-gradient(120% 90% at 100% 100%, rgba(99,102,241,.14), transparent 60%);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:1.5rem;
+}
+.bundle-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(148,163,184,.18);
+  background:
+    linear-gradient(160deg, rgba(15,23,42,.95), rgba(22,32,50,.92));
+  transition:transform .35s cubic-bezier(.22,1,.36,1), border-color .3s ease, box-shadow .35s ease;
+}
+.bundle-card::before{
+  content:'';
+  position:absolute;
+  inset:-1px;
+  border-radius:inherit;
+  background:linear-gradient(130deg, rgba(99,102,241,.35), rgba(20,184,166,.25), transparent 68%);
+  opacity:0;
+  transition:opacity .35s ease;
+  pointer-events:none;
+}
+.bundle-card:hover{
+  transform:translateY(-5px);
+  border-color:rgba(99,102,241,.48);
+  box-shadow:0 18px 40px rgba(2,6,23,.42);
+}
+.bundle-card:hover::before{opacity:1}
+.bundle-title{font-size:1.08rem;font-weight:700;letter-spacing:.01em}
+.bundle-price{
+  font-family:'Syne',sans-serif;
+  font-size:1.9rem;
+  font-weight:700;
+  margin:.9rem 0;
+  background:linear-gradient(120deg,#a5b4fc,#5eead4);
+  background-clip:text;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.bundle-meta-row{
+  margin-top:.65rem;
+  padding:.5rem .65rem;
+  border-radius:10px;
+  border:1px solid rgba(148,163,184,.18);
+  background:rgba(255,255,255,.02);
+}
+.panel-shell{
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:1.35rem;
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(99,102,241,.1), transparent 55%),
+    radial-gradient(120% 80% at 100% 100%, rgba(20,184,166,.1), transparent 60%);
+}
+.premium-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(148,163,184,.18);
+  background:linear-gradient(160deg, rgba(15,23,42,.95), rgba(22,32,50,.9));
+  transition:transform .32s cubic-bezier(.22,1,.36,1), border-color .28s ease, box-shadow .32s ease;
+}
+.premium-card::before{
+  content:'';
+  position:absolute;
+  inset:-1px;
+  border-radius:inherit;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .32s ease;
+  background:linear-gradient(120deg, rgba(99,102,241,.28), rgba(20,184,166,.2), transparent 70%);
+}
+.premium-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(99,102,241,.45);
+  box-shadow:0 14px 34px rgba(2,6,23,.4);
+}
+.premium-card:hover::before{opacity:1}
+.premium-table-wrap{
+  border:1px solid rgba(148,163,184,.22);
+  border-radius:14px;
+  background:linear-gradient(160deg, rgba(15,23,42,.8), rgba(22,32,50,.68));
+}
+
+/* HOME ENHANCEMENTS */
+.home-shell{padding:0 2rem 4rem;max-width:1280px;margin:0 auto}
+.home-strip{margin-top:-2rem;position:relative;z-index:2}
+.home-strip-card{
+  border:1px solid rgba(99,102,241,.28);
+  border-radius:18px;
+  padding:1rem;
+  background:
+    linear-gradient(160deg, rgba(15,23,42,.9), rgba(22,32,50,.84)),
+    radial-gradient(120% 90% at 0% 0%, rgba(99,102,241,.16), transparent 58%);
+}
+.home-resume{display:none;margin-bottom:1rem}
+.home-resume.active{display:block}
+.home-grid{display:grid;gap:1rem}
+.home-grid-3{grid-template-columns:repeat(3,1fr)}
+.home-grid-4{grid-template-columns:repeat(4,1fr)}
+.home-widget{
+  border:1px solid rgba(148,163,184,.2);
+  border-radius:16px;
+  padding:1rem;
+  background:linear-gradient(160deg, rgba(15,23,42,.86), rgba(30,41,59,.72));
+  transition:transform .28s ease,border-color .28s ease,box-shadow .3s ease;
+}
+.home-widget:hover{transform:translateY(-3px);border-color:rgba(99,102,241,.42);box-shadow:0 12px 28px rgba(2,6,23,.32)}
+.home-widget-title{font-size:.8rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem}
+.home-card-title{font-weight:700;font-size:1rem}
+.home-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:.72rem;background:rgba(20,184,166,.14);border:1px solid rgba(20,184,166,.3);color:#5eead4}
+.home-recent{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.7rem}
+.home-recent-chip{font-size:.72rem;padding:4px 10px;border-radius:999px;border:1px solid var(--border2);background:rgba(255,255,255,.03);color:var(--text2)}
+.home-feed{list-style:none;margin:0;padding:0;display:grid;gap:.55rem}
+.home-feed li{padding:.65rem;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.02)}
+@media(max-width:1024px){.home-grid-4{grid-template-columns:repeat(2,1fr)}.home-grid-3{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.home-shell{padding:0 1rem 3rem}.home-grid-4,.home-grid-3{grid-template-columns:1fr}}
+@media(max-width:1024px){.admin-grid-analytics{grid-template-columns:1fr}}
+
+/* HERO */
+.hero{position:relative;min-height:calc(100vh - 70px);display:flex;align-items:center;overflow:hidden}
+.hero-bg{position:absolute;inset:0;pointer-events:none}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.35}
+.hero-orb-1{width:600px;height:600px;background:var(--indigo);top:-20%;left:-10%}
+.hero-orb-2{width:500px;height:500px;background:var(--violet);bottom:-20%;right:-5%}
+.hero-orb-3{width:300px;height:300px;background:var(--teal);top:40%;left:40%}
+.hero-content{position:relative;z-index:1;padding:4rem 2rem;max-width:1280px;margin:0 auto;width:100%}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;
+  background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);
+  color:#a5b4fc;padding:.4rem 1rem;border-radius:100px;font-size:.8rem;font-weight:500;margin-bottom:1.5rem}
+.hero-dot{width:7px;height:7px;border-radius:50%;background:var(--indigo);animation:pulse 2s infinite}
+.hero h1{font-size:clamp(2.8rem,7vw,5.5rem);font-weight:800;letter-spacing:-.04em;line-height:1;max-width:15ch;margin-bottom:1.5rem}
+.hero h1 .grad{background:linear-gradient(135deg,var(--indigo),var(--violet),var(--teal));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:1.15rem;color:var(--text2);line-height:1.7;max-width:46ch;margin-bottom:2.5rem}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
+.hero-stats{display:flex;gap:3rem;margin-top:3.5rem;padding-top:2.5rem;border-top:1px solid var(--border);flex-wrap:wrap}
+.stat-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:700;background:linear-gradient(135deg,var(--indigo),var(--violet));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:.8rem;color:var(--text3);margin-top:2px}
+
+/* TOAST */
+#toast{position:fixed;bottom:2rem;right:2rem;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:1rem 1.25rem;z-index:9999;transform:translateY(100px);opacity:0;
+  transition:all .3s;max-width:300px;font-size:.88rem;display:flex;align-items:center;gap:.75rem}
+#toast.show{transform:translateY(0);opacity:1}
+#toast .toast-icon{font-size:1.1rem}
+
+.responsive-nav{display:none}
+@media(max-width:768px){
+  .responsive-nav{display:flex;flex-direction:column;position:fixed;top:70px;left:0;right:0;
+    background:rgba(2,8,23,.98);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);
+    padding:1rem;gap:.5rem;z-index:999}
+  .responsive-nav a{padding:.75rem 1rem;border-radius:8px;color:var(--text2);text-decoration:none;font-size:.9rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="main-nav">
+  <div class="nav-logo">Journey<span style="color:var(--teal);-webkit-text-fill-color:var(--teal)">Play</span></div>
+  <ul class="nav-links">
+    <li><a onclick="goto('home')" data-page="home">Home</a></li>
+    <li><a onclick="goto('travel')" data-page="travel">Book Travel</a></li>
+    <li><a onclick="goto('bundles')" data-page="bundles">OTT Bundles</a></li>
+    <li><a onclick="goto('partners')" data-page="partners">Partners</a></li>
+    <li><a onclick="goto('admin')" data-page="admin">Admin</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="btn btn-ghost" style="font-size:.82rem" onclick="goto('login')">Sign in</button>
+    <div class="nav-avatar" onclick="goto('account')" title="Account">AR</div>
+  </div>
+</nav>
+
+<!-- TOAST -->
+<div id="toast"><span class="toast-icon">✓</span><span id="toast-msg">Action completed</span></div>
+
+<!-- HERO HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-bg">
+      <div class="hero-orb hero-orb-1"></div>
+      <div class="hero-orb hero-orb-2"></div>
+      <div class="hero-orb hero-orb-3"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-eyebrow"><span class="hero-dot"></span>Travel + Entertainment Platform</div>
+      <h1>One Ticket.<br><span class="grad">Endless</span><br>Entertainment.</h1>
+      <p class="hero-sub">Book your journey or hotel stay and watch your favorite OTT content during travel. Trains, flights, buses, hotels — always entertained.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary btn-lg" onclick="goto('travel')">Explore Travel</button>
+        <button class="btn btn-ghost btn-lg" onclick="goto('bundles')">View Bundles</button>
+      </div>
+      <div class="hero-stats">
+        <div><div class="stat-num">2M+</div><div class="stat-label">Travelers served</div></div>
+        <div><div class="stat-num">50+</div><div class="stat-label">OTT partners</div></div>
+        <div><div class="stat-num">15k+</div><div class="stat-label">Daily active sessions</div></div>
+        <div><div class="stat-num">12</div><div class="stat-label">Languages supported</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-shell">
+    <div id="home-resume" class="home-resume"></div>
+
+    <div class="home-strip">
+      <div class="home-strip-card">
+        <div class="home-widget-title">Smart Quick Search</div>
+        <div class="grid g6 gap-4">
+          <div><label>From</label><input id="home-from" placeholder="Mumbai"/></div>
+          <div><label>To</label><input id="home-to" placeholder="Delhi"/></div>
+          <div><label>Date</label><input id="home-date" type="date"/></div>
+          <div><label>Passengers</label><select id="home-pass"><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select></div>
+          <div><label>Mode</label><select id="home-mode"><option value="all" selected>All</option><option value="train">Train</option><option value="flight">Flight</option><option value="bus">Bus</option><option value="hotel">Hotel</option></select></div>
+          <div style="display:flex;align-items:end"><button class="btn btn-primary w-full" style="padding:.7rem" onclick="homeQuickSearch()">Search Journey</button></div>
+        </div>
+        <div id="home-recent-searches" class="home-recent"></div>
+      </div>
+    </div>
+
+    <div class="home-grid home-grid-3 mt-4" id="home-reco-journeys"></div>
+    <div class="home-grid home-grid-3 mt-4" id="home-bundle-spotlight"></div>
+    <div class="home-grid home-grid-3 mt-4" id="home-offers"></div>
+
+    <div class="home-grid home-grid-4 mt-4" id="home-trust-cards"></div>
+
+    <div class="home-widget mt-4">
+      <div class="flex items-center justify-between mb-2">
+        <div class="home-widget-title" style="margin:0">Live Activity</div>
+        <span class="home-pill">Realtime</span>
+      </div>
+      <ul id="home-live-feed" class="home-feed"></ul>
+    </div>
+  </div>
+</div>
+
+<!-- TRAVEL PAGE -->
+<div class="page" id="page-travel">
+  <div class="container" style="padding:2rem 1.5rem">
+    <h2 class="section-title">Book Your Journey or Stay</h2>
+    <div class="card p-6">
+      <div class="grid g2 gap-4">
+        <div><label>From</label><input type="text" id="s-from" placeholder="Mumbai"/></div>
+        <div><label>To</label><input type="text" id="s-to" placeholder="Delhi"/></div>
+        <div><label>Date</label><input type="date" id="s-date"/></div>
+        <div><label>Passengers</label><select id="s-pass"><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select></div>
+      </div>
+      <button class="btn btn-primary w-full mt-4" style="padding:.8rem" onclick="searchJourneys()">Search Journeys</button>
+    </div>
+    <div id="journey-results" class="grid g2 gap-4 mt-4"></div>
+  </div>
+</div>
+
+<!-- BUNDLES PAGE -->
+<div class="page" id="page-bundles">
+  <div class="container bundles-shell" style="padding-top:2rem;padding-bottom:4rem">
+    <h1 class="section-title">OTT Entertainment Bundles</h1>
+    <p class="text-muted mb-4">Explore bundles mapped to Indian OTT platforms and compatible airline or railway partners.</p>
+    <div class="card p-4 mb-4" style="background:linear-gradient(160deg,rgba(15,23,42,.9),rgba(22,32,50,.82));border:1px solid rgba(99,102,241,.25)">
+      <div class="grid g3 gap-4">
+        <div>
+          <label>Travel Mode</label>
+          <select class="select-soft select-native-menu" id="bundle-mode-filter" onchange="renderBundles()">
+            <option value="all" selected>All modes</option>
+            <option value="flight">Flight</option>
+            <option value="train">Train</option>
+            <option value="bus">Bus</option>
+            <option value="hotel">Hotel</option>
+          </select>
+        </div>
+        <div>
+          <label>Partner Type</label>
+          <select class="select-soft select-native-menu" id="bundle-partner-type-filter" onchange="renderBundles()">
+            <option value="all" selected>All partners</option>
+            <option value="airline">Airlines</option>
+            <option value="railway">Railways</option>
+            <option value="hotel">Hotels</option>
+          </select>
+        </div>
+        <div>
+          <label>OTT Platform</label>
+          <select class="select-soft select-native-menu" id="bundle-platform-filter" onchange="renderBundles()">
+            <option value="all" selected>All platforms</option>
+            <option value="JioHotstar">JioHotstar</option>
+            <option value="SonyLIV">SonyLIV</option>
+            <option value="ZEE5">ZEE5</option>
+            <option value="SunNXT">SunNXT</option>
+            <option value="aha">aha</option>
+            <option value="Hoichoi">Hoichoi</option>
+            <option value="Chaupal">Chaupal</option>
+            <option value="ShemarooMe">ShemarooMe</option>
+            <option value="ETV Win">ETV Win</option>
+            <option value="ManoramaMAX">ManoramaMAX</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="bundle-checkout-summary" class="card p-4 mb-4" style="display:none"></div>
+    <div class="grid g4 gap-6" id="all-bundles"></div>
+  </div>
+</div>
+
+<!-- LOGIN PAGE -->
+<div class="page" id="page-login">
+  <div class="container" style="padding:4rem 1.5rem;text-align:center">
+    <h1 class="section-title">Sign In</h1>
+    <div class="card p-6" style="max-width:400px;margin:0 auto">
+      <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="you@example.com"/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"/></div>
+      <button class="btn btn-primary w-full" style="padding:.8rem;margin-top:1rem" onclick="handleLogin()">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- ACCOUNT PAGE -->
+<div class="page" id="page-account">
+  <div class="container panel-shell" style="padding:2rem 1.5rem">
+    <h1 class="section-title">My Account</h1>
+    <div class="card p-6 premium-card">
+      <div class="grid g2 gap-4">
+        <div><label>Name</label><input value="Arjun Rao"/></div>
+        <div><label>Email</label><input value="arjun.rao@email.com"/></div>
+      </div>
+      <button class="btn btn-primary mt-4" onclick="showToast('Account updated!','var(--teal)')">Save Changes</button>
+    </div>
+    <div class="card p-6 mt-4 premium-card">
+      <div class="flex items-center justify-between mb-4">
+        <h3>My Recent Bookings</h3>
+        <button class="btn btn-ghost" onclick="renderAccount()">Refresh</button>
+      </div>
+      <div class="table-wrap premium-table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Reference</th>
+              <th>Journey</th>
+              <th>Bundle</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="account-bookings-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PAGE -->
+<div class="page" id="page-admin">
+  <div class="container panel-shell" style="padding:2rem 1.5rem">
+    <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+      <div>
+        <h1 class="section-title" style="margin-bottom:.35rem">Admin Dashboard</h1>
+        <p class="text-muted">Operations, finance, growth, and support controls in one place.</p>
+      </div>
+      <div class="admin-toolbar">
+        <select class="select-soft" id="admin-range" onchange="renderAdminDashboard()">
+          <option value="1">Today</option>
+          <option value="7" selected>Last 7 days</option>
+          <option value="30">Last 30 days</option>
+        </select>
+        <button class="btn btn-ghost" onclick="renderAdminDashboard()">Refresh</button>
+      </div>
+    </div>
+
+    <div class="grid g4 gap-4" id="admin-kpis"></div>
+
+    <div class="admin-grid-analytics mt-4">
+      <div class="card p-6 premium-card">
+        <div class="flex items-center justify-between mb-4">
+          <h3>Revenue Trend</h3>
+          <span class="badge badge-indigo">Daily</span>
+        </div>
+        <div id="admin-revenue-bars" class="bar-wrap"></div>
+      </div>
+      <div class="card p-6 premium-card">
+        <div class="flex items-center justify-between mb-4">
+          <h3>Live Activity Feed</h3>
+          <span class="badge badge-teal">Realtime</span>
+        </div>
+        <ul id="admin-activity-feed" class="admin-feed"></ul>
+      </div>
+    </div>
+
+    <div class="grid g2 gap-4 mt-4">
+      <div class="card p-6 premium-card">
+        <div class="flex items-center justify-between mb-4">
+          <h3>Top Routes</h3>
+          <span class="badge badge-amber">Demand</span>
+        </div>
+        <ul id="admin-top-routes" class="admin-list"></ul>
+      </div>
+      <div class="card p-6 premium-card">
+        <div class="flex items-center justify-between mb-4">
+          <h3>Top Bundles</h3>
+          <span class="badge badge-indigo">Attach Rate</span>
+        </div>
+        <ul id="admin-top-bundles" class="admin-list"></ul>
+      </div>
+    </div>
+
+    <div class="card p-6 mt-4 premium-card">
+      <div class="flex items-center justify-between mb-4">
+        <h3>Booking Operations Queue</h3>
+        <div class="flex items-center gap-4">
+          <select class="select-soft" id="admin-booking-filter" onchange="renderAdminDashboard()">
+            <option value="all" selected>All statuses</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="pending">Pending</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap premium-table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Reference</th>
+              <th>User</th>
+              <th>Route</th>
+              <th>Bundle</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody id="admin-bookings-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card p-6 mt-4 premium-card">
+      <div class="flex items-center justify-between mb-4">
+        <h3>User Management</h3>
+        <button class="btn btn-ghost" onclick="exportAdminUsersCsv()">Export CSV</button>
+      </div>
+      <div class="table-wrap premium-table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Plan</th>
+              <th>Total Spend</th>
+              <th>Sessions</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="admin-users-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid g3 gap-4 mt-4">
+      <button class="btn btn-primary" onclick="showToast('Campaign launched to repeat users','var(--indigo)')">Launch Campaign</button>
+      <button class="btn btn-teal" onclick="showToast('Refund queue synced','var(--teal)')">Sync Refund Queue</button>
+      <button class="btn btn-ghost" onclick="showToast('Partner payout report generated','var(--amber)')">Generate Payout Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- PARTNERS PAGE -->
+<div class="page" id="page-partners">
+  <div class="container" style="padding:2rem 1.5rem">
+    <h1 class="section-title">Our Partners</h1>
+    <p class="text-muted mb-6">Connecting travel companies with OTT platforms for seamless entertainment.</p>
+  </div>
+</div>
+
+<script>
+// Mock data
+const ROUTES = [
+  {id:1,name:'Rajdhani Express',mode:'train',operator:'Rajdhani Express',from:'Mumbai',to:'Delhi',dep:'06:00',arr:'21:40',duration:'15h 40m',price:1240,rating:4.8},
+  {id:2,name:'Shatabdi Express',mode:'train',operator:'Shatabdi Express',from:'Mumbai',to:'Pune',dep:'07:30',arr:'10:45',duration:'3h 15m',price:540,rating:4.5},
+  {id:3,name:'IndiGo Flight',mode:'flight',operator:'IndiGo',from:'Mumbai',to:'Delhi',dep:'09:15',arr:'11:30',duration:'2h 15m',price:3820,rating:4.3},
+  {id:4,name:'Taj Palace Stay',mode:'hotel',operator:'Taj Hotels',from:'Mumbai',to:'Mumbai',dep:'14:00',arr:'12:00',duration:'22h',price:6490,rating:4.9}
+];
+
+let SELECTED_JOURNEY = null;
+let SELECTED_BUNDLE = null;
+let CURRENT_USER_ID = localStorage.getItem('jp_user_id') || '507f1f77bcf86cd799439011';
+
+function isObjectId(value) {
+  return typeof value === 'string' && /^[a-f\d]{24}$/i.test(value);
+}
+
+const BUNDLES = [
+  {
+    id:'free',name:'City Hop Pack',hours:1,price:0,
+    features:['Ad-lite streaming','SD quality','Regional short-form picks'],
+    platformNames:['JioHotstar','ZEE5','SonyLIV','ShemarooMe','Chaupal'],
+    airlinePartners:['IndiGo','Akasa Air'],
+    railwayPartners:['IRCTC','Vande Bharat'],
+    hotelPartners:['Lemon Tree Hotels'],
+    eligibleModes:['train','flight']
+  },
+  {
+    id:'3hr',name:'Intercity Express Pack',hours:3,price:29,
+    features:['HD streaming','Live TV snippets','Sports highlights'],
+    platformNames:['JioHotstar','SonyLIV','ZEE5','aha','SunNXT','Hoichoi','ETV Win'],
+    airlinePartners:['IndiGo','Air India','SpiceJet'],
+    railwayPartners:['Rajdhani Express','Shatabdi Express','Vande Bharat'],
+    hotelPartners:['Ginger Hotels','FabHotels'],
+    eligibleModes:['train','flight']
+  },
+  {
+    id:'6hr',name:'Pan India Voyage Pack',hours:6,price:49,
+    features:['Full HD streaming','Download queue','Kids + sports lane'],
+    platformNames:['JioHotstar','SonyLIV','ZEE5','SunNXT','aha','Hoichoi','Chaupal','ShemarooMe','ManoramaMAX'],
+    airlinePartners:['Air India','Akasa Air','IndiGo'],
+    railwayPartners:['IRCTC','Rajdhani Express','Shatabdi Express'],
+    hotelPartners:['Taj Hotels','ITC Hotels','The Leela'],
+    eligibleModes:['train','flight','bus','hotel']
+  },
+  {
+    id:'full',name:'Bharat Unlimited Journey Pack',hours:999,price:79,
+    features:['4K where available','Offline mode','Multi-device continuation','Priority CDN lanes'],
+    platformNames:['JioHotstar','SonyLIV','ZEE5','SunNXT','aha','Hoichoi','Chaupal','ShemarooMe','ETV Win','ManoramaMAX'],
+    airlinePartners:['IndiGo','Air India','Akasa Air','SpiceJet'],
+    railwayPartners:['IRCTC','Rajdhani Express','Shatabdi Express','Vande Bharat'],
+    hotelPartners:['Taj Hotels','Oberoi Hotels','Marriott India','Hyatt India'],
+    eligibleModes:['train','flight','bus','hotel']
+  }
+];
+
+const ADMIN_USERS = [
+  {id:'U-1021',name:'Arjun Rao',email:'arjun.rao@email.com',plan:'premium',totalSpent:12890,sessions:28,status:'active'},
+  {id:'U-1054',name:'Neha Sharma',email:'neha.sharma@email.com',plan:'business',totalSpent:22340,sessions:41,status:'active'},
+  {id:'U-1138',name:'Karan Iyer',email:'karan.iyer@email.com',plan:'basic',totalSpent:3240,sessions:11,status:'active'},
+  {id:'U-1204',name:'Sana Khan',email:'sana.khan@email.com',plan:'free',totalSpent:0,sessions:4,status:'suspended'},
+  {id:'U-1219',name:'Ritika Sen',email:'ritika.sen@email.com',plan:'premium',totalSpent:9480,sessions:22,status:'active'}
+];
+
+const ADMIN_BOOKINGS = [
+  {ref:'JP92A1',user:'Arjun Rao',route:'Mumbai → Delhi',bundle:'6 Hour Pack',amount:1289,status:'confirmed',hoursAgo:3},
+  {ref:'JP41K8',user:'Neha Sharma',route:'Mumbai → Pune',bundle:'3 Hour Pack',amount:569,status:'pending',hoursAgo:5},
+  {ref:'JP73Q2',user:'Karan Iyer',route:'Mumbai → Delhi',bundle:'Full Journey Pack',amount:3929,status:'confirmed',hoursAgo:8},
+  {ref:'JP28M6',user:'Ritika Sen',route:'Mumbai → Goa',bundle:'1 Hour Pack',amount:710,status:'cancelled',hoursAgo:13},
+  {ref:'JP19P4',user:'Neha Sharma',route:'Mumbai → Delhi',bundle:'6 Hour Pack',amount:3889,status:'confirmed',hoursAgo:20},
+  {ref:'JP65C9',user:'Sana Khan',route:'Mumbai → Pune',bundle:'3 Hour Pack',amount:569,status:'pending',hoursAgo:31},
+  {ref:'JP55N3',user:'Arjun Rao',route:'Mumbai → Delhi',bundle:'6 Hour Pack',amount:1289,status:'confirmed',hoursAgo:46}
+];
+
+const ADMIN_REVENUE_TREND = [
+  {label:'Mon',value:28200},
+  {label:'Tue',value:31800},
+  {label:'Wed',value:29500},
+  {label:'Thu',value:36200},
+  {label:'Fri',value:42800},
+  {label:'Sat',value:50200},
+  {label:'Sun',value:47600}
+];
+
+const ADMIN_ACTIVITY = [
+  {text:'New signup: Ritika Sen (premium trial)',type:'user',mins:6},
+  {text:'Booking JP92A1 confirmed for Mumbai → Delhi',type:'booking',mins:12},
+  {text:'Payment retry succeeded for JP41K8',type:'payment',mins:19},
+  {text:'Refund request raised for JP28M6',type:'refund',mins:34},
+  {text:'Partner score updated: Neeta Travels +2',type:'partner',mins:44}
+];
+
+const HOME_OFFERS = [
+  {title:'Flight + OTT Combo',desc:'Get 12% off on Intercity Express Pack with IndiGo sectors.',tag:'Ends in 5h'},
+  {title:'Rajdhani Night Saver',desc:'Flat ₹80 off on Pan India Voyage Pack for overnight trains.',tag:'Limited seats'},
+  {title:'Weekend Family Pass',desc:'Book 3+ passengers and unlock free 1h City Hop add-on.',tag:'Weekend only'},
+];
+
+const HOME_LIVE_ACTIVITY = [
+  '124 users booked in the last hour',
+  'Most picked bundle today: Pan India Voyage Pack',
+  'Top route right now: Mumbai -> Delhi',
+  'Refund success rate this week: 98.4%',
+  'Support average response: 2 min',
+];
+
+// Page navigation
+function goto(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  
+  if(page === 'travel') renderTravel();
+  if(page === 'home') renderHome();
+  if(page === 'bundles') renderBundles();
+  if(page === 'account') renderAccount();
+  if(page === 'admin') renderAdminDashboard();
+}
+
+// Toast
+function showToast(msg, color = 'var(--teal)') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.style.borderLeftColor = color;
+  t.style.borderLeftWidth = '3px';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Travel
+function normalizeJourney(route) {
+  return {
+    id: route._id || route.id,
+    name: route.name,
+    mode: route.mode || 'train',
+    operator: route.name,
+    from: route.from,
+    to: route.to,
+    dep: route.departureTime || route.dep || '--:--',
+    arr: route.arrivalTime || route.arr || '--:--',
+    duration: route.duration || '2h',
+    price: typeof route.price === 'number' ? route.price : 0,
+    rating: route.rating || 4.0,
+  };
+}
+
+async function renderTravel() {
+  const container = document.getElementById('journey-results');
+  if(!container) return;
+  const fromApi = await fetchRoutesFromBackend();
+  const source = Array.isArray(fromApi) && fromApi.length ? fromApi.map(normalizeJourney) : ROUTES;
+  window.__journeyCache = source;
+
+  container.innerHTML = source.map(r => `
+    <div class="card p-4">
+      <div class="flex items-center justify-between mb-2">
+        <div style="font-weight:600">${r.name}</div>
+        <span class="badge badge-teal">${r.mode}</span>
+      </div>
+      <div style="color:var(--text2);font-size:.9rem">${r.from} → ${r.to}</div>
+      <div style="margin-top:.75rem;display:flex;justify-content:space-between;align-items:center">
+        <div class="text-sm text-muted">${r.dep} - ${r.arr}</div>
+        <div style="font-weight:700;color:var(--indigo)">₹${r.price}</div>
+      </div>
+      <button class="btn btn-primary w-full mt-3" style="padding:.6rem;font-size:.85rem" onclick='selectJourney(${JSON.stringify(String(r.id))})'>Select</button>
+    </div>
+  `).join('');
+}
+
+function selectJourney(routeId) {
+  const source = window.__journeyCache && window.__journeyCache.length ? window.__journeyCache : ROUTES;
+  const selected = source.find((r) => String(r.id) === String(routeId));
+  if (!selected) return;
+  SELECTED_JOURNEY = selected;
+
+  const modeFilter = document.getElementById('bundle-mode-filter');
+  if (modeFilter && selected.mode) modeFilter.value = selected.mode;
+
+  showToast(`Selected ${selected.name}. Bundles ranked for this journey.`, 'var(--teal)');
+  goto('bundles');
+}
+
+function searchJourneys() {
+  renderTravel();
+  showToast('Journeys loaded!', 'var(--indigo)');
+}
+
+function getRecentSearches() {
+  try {
+    const raw = localStorage.getItem('jp_recent_searches');
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function persistRecentSearch(item) {
+  const prev = getRecentSearches();
+  const next = [item, ...prev.filter((s) => s.key !== item.key)].slice(0, 6);
+  localStorage.setItem('jp_recent_searches', JSON.stringify(next));
+}
+
+function renderRecentSearches() {
+  const target = document.getElementById('home-recent-searches');
+  if (!target) return;
+  const recent = getRecentSearches();
+
+  if (!recent.length) {
+    target.innerHTML = `<span class="home-recent-chip">No recent searches yet</span>`;
+    return;
+  }
+
+  target.innerHTML = recent.map((r) => `<button class="home-recent-chip" onclick='applyRecentSearch(${JSON.stringify(r.key)})'>${r.from} -> ${r.to} · ${r.mode}</button>`).join('');
+}
+
+function applyRecentSearch(searchKey) {
+  const found = getRecentSearches().find((s) => s.key === searchKey);
+  if (!found) return;
+  const from = document.getElementById('home-from');
+  const to = document.getElementById('home-to');
+  const date = document.getElementById('home-date');
+  const pass = document.getElementById('home-pass');
+  const mode = document.getElementById('home-mode');
+  if (from) from.value = found.from;
+  if (to) to.value = found.to;
+  if (date) date.value = found.date;
+  if (pass) pass.value = found.passengers;
+  if (mode) mode.value = found.mode;
+}
+
+function homeQuickSearch() {
+  const from = document.getElementById('home-from')?.value || 'Mumbai';
+  const to = document.getElementById('home-to')?.value || 'Delhi';
+  const date = document.getElementById('home-date')?.value || new Date().toISOString().slice(0, 10);
+  const passengers = document.getElementById('home-pass')?.value || '1';
+  const mode = document.getElementById('home-mode')?.value || 'all';
+
+  persistRecentSearch({ key: `${from}-${to}-${mode}`, from, to, date, passengers, mode });
+
+  const tFrom = document.getElementById('s-from');
+  const tTo = document.getElementById('s-to');
+  const tDate = document.getElementById('s-date');
+  const tPass = document.getElementById('s-pass');
+
+  if (tFrom) tFrom.value = from;
+  if (tTo) tTo.value = to;
+  if (tDate) tDate.value = date;
+  if (tPass) tPass.value = passengers;
+
+  goto('travel');
+  showToast('Search applied. Pick your journey below.', 'var(--indigo)');
+}
+
+function renderHomeResume() {
+  const target = document.getElementById('home-resume');
+  if (!target) return;
+  if (!SELECTED_JOURNEY && !SELECTED_BUNDLE) {
+    target.classList.remove('active');
+    target.innerHTML = '';
+    return;
+  }
+
+  const journeyName = SELECTED_JOURNEY ? SELECTED_JOURNEY.name : 'No journey selected';
+  const bundleName = window.__bundleCache?.find((b) => String(b.id) === String(SELECTED_BUNDLE))?.name || 'No bundle selected';
+
+  target.classList.add('active');
+  target.innerHTML = `
+    <div class="home-widget">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <div class="home-widget-title" style="margin-bottom:.2rem">Resume Checkout</div>
+          <div class="text-sm">${journeyName} · ${bundleName}</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="btn btn-ghost" onclick="goto('bundles')">Review Bundle</button>
+          <button class="btn btn-primary" onclick="goto('bundles'); setTimeout(() => proceedBundleCheckout(), 120);">Continue</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderHomeRecommendations(journeys, bundles) {
+  const journeyTarget = document.getElementById('home-reco-journeys');
+  const bundleTarget = document.getElementById('home-bundle-spotlight');
+  const offersTarget = document.getElementById('home-offers');
+  const trustTarget = document.getElementById('home-trust-cards');
+  const feedTarget = document.getElementById('home-live-feed');
+
+  if (!journeyTarget || !bundleTarget || !offersTarget || !trustTarget || !feedTarget) return;
+
+  const topJourneys = journeys.slice(0, 3);
+  journeyTarget.innerHTML = topJourneys.map((j) => `
+    <div class="home-widget">
+      <div class="home-widget-title">Popular Route</div>
+      <div class="home-card-title">${j.from} -> ${j.to}</div>
+      <div class="text-sm text-muted mt-1">${j.name} · ${j.duration || '2h'}</div>
+      <div class="flex items-center justify-between mt-3">
+        <span class="home-pill">${j.mode || 'train'}</span>
+        <span class="fw-700">₹${j.price}</span>
+      </div>
+    </div>
+  `).join('');
+
+  const topBundles = bundles.slice(0, 3);
+  bundleTarget.innerHTML = topBundles.map((b) => `
+    <div class="home-widget">
+      <div class="home-widget-title">Bundle Spotlight</div>
+      <div class="home-card-title">${b.name}</div>
+      <div class="text-sm text-muted mt-1">${(b.platformNames || []).slice(0, 3).join(' • ') || `${b.ottPlatforms || 5} platforms`}</div>
+      <div class="flex items-center justify-between mt-3">
+        <span class="home-pill">${b.hours === 999 ? 'Unlimited' : `${b.hours}h`}</span>
+        <span class="fw-700">${b.price === 0 ? 'Free' : `₹${b.price}`}</span>
+      </div>
+    </div>
+  `).join('');
+
+  offersTarget.innerHTML = HOME_OFFERS.map((o) => `
+    <div class="home-widget">
+      <div class="home-widget-title">Combo Offer</div>
+      <div class="home-card-title">${o.title}</div>
+      <div class="text-sm text-muted mt-1">${o.desc}</div>
+      <div class="mt-3"><span class="home-pill">${o.tag}</span></div>
+    </div>
+  `).join('');
+
+  const trust = [
+    {title:'On-time Partner Score',value:'96.8%'},
+    {title:'Refund Success Rate',value:'98.4%'},
+    {title:'Secure Payments',value:'PCI-DSS'},
+    {title:'Live Support',value:'24x7'},
+  ];
+  trustTarget.innerHTML = trust.map((t) => `
+    <div class="home-widget">
+      <div class="home-widget-title">${t.title}</div>
+      <div class="home-card-title">${t.value}</div>
+    </div>
+  `).join('');
+
+  feedTarget.innerHTML = HOME_LIVE_ACTIVITY.map((item) => `<li>${item}</li>`).join('');
+}
+
+async function renderHome() {
+  const routeData = await fetchRoutesFromBackend();
+  const bundleData = await fetchBundlesFromBackend();
+
+  const journeys = Array.isArray(routeData) && routeData.length
+    ? routeData.map(normalizeJourney)
+    : ROUTES;
+  const bundles = Array.isArray(bundleData) && bundleData.length
+    ? bundleData.map(normalizeBundle)
+    : BUNDLES;
+
+  window.__journeyCache = journeys;
+  window.__bundleCache = bundles;
+
+  renderRecentSearches();
+  renderHomeResume();
+  renderHomeRecommendations(journeys, bundles);
+}
+
+// Bundles
+function normalizeBundle(bundle) {
+  return {
+    id: bundle._id || bundle.id,
+    name: bundle.name,
+    hours: bundle.hours,
+    price: bundle.price,
+    features: bundle.features || [],
+    platformNames: bundle.platformNames || [],
+    airlinePartners: bundle.airlinePartners || [],
+    railwayPartners: bundle.railwayPartners || [],
+    hotelPartners: bundle.hotelPartners || [],
+    eligibleModes: bundle.eligibleModes || []
+  };
+}
+
+function getDurationHours(value) {
+  if (!value || typeof value !== 'string') return 2;
+  const hourMatch = value.match(/(\d+)\s*h/i);
+  const minMatch = value.match(/(\d+)\s*m/i);
+  const hours = hourMatch ? Number(hourMatch[1]) : 0;
+  const mins = minMatch ? Number(minMatch[1]) : 0;
+  const total = hours + mins / 60;
+  return total > 0 ? total : 2;
+}
+
+function getBundleRecommendation(bundle) {
+  if (!SELECTED_JOURNEY) {
+    return { score: 50, label: 'Standard fit', className: 'reco-mid' };
+  }
+
+  let score = 30;
+  const mode = SELECTED_JOURNEY.mode;
+  const operator = SELECTED_JOURNEY.operator;
+
+  if ((bundle.eligibleModes || []).includes(mode)) score += 30;
+
+  if (mode === 'flight' && (bundle.airlinePartners || []).includes(operator)) score += 20;
+  if (mode === 'train' && (bundle.railwayPartners || []).includes(operator)) score += 20;
+  if (mode === 'hotel' && (bundle.hotelPartners || []).includes(operator)) score += 20;
+
+  const neededHours = getDurationHours(SELECTED_JOURNEY.duration);
+  if (bundle.hours === 999 || bundle.hours >= neededHours) score += 20;
+  else score -= 10;
+
+  if (score >= 80) return { score, label: 'Best match', className: 'reco-high' };
+  if (score >= 60) return { score, label: 'Good match', className: 'reco-mid' };
+  return { score, label: 'Limited fit', className: 'reco-low' };
+}
+
+function selectBundleById(bundleId) {
+  SELECTED_BUNDLE = bundleId;
+  renderBundles();
+}
+
+function renderBundleCheckoutSummary(selectedEntry) {
+  const target = document.getElementById('bundle-checkout-summary');
+  if (!target || !selectedEntry) return;
+
+  const { bundle, recommendation } = selectedEntry;
+  target.style.display = 'block';
+  target.innerHTML = `
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <div class="text-xs text-faint">Default Checkout Bundle</div>
+        <div class="text-lg fw-700">${bundle.name}</div>
+        <div class="text-sm text-muted mt-1">${SELECTED_JOURNEY ? `Matched for ${SELECTED_JOURNEY.name}` : 'Top-ranked by current filters'} · ${recommendation.label} (${recommendation.score}%)</div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="text-lg fw-700">${bundle.price === 0 ? 'Free' : '₹' + bundle.price}</div>
+        <button class="btn btn-primary" onclick="proceedBundleCheckout()">Continue to Checkout</button>
+      </div>
+    </div>
+  `;
+}
+
+async function proceedBundleCheckout() {
+  if (!SELECTED_BUNDLE) {
+    showToast('Choose a bundle first', 'var(--rose)');
+    return;
+  }
+
+  if (!SELECTED_JOURNEY) {
+    showToast('Please select a journey first', 'var(--rose)');
+    goto('travel');
+    return;
+  }
+
+  const bundle = window.__bundleCache?.find((b) => String(b.id) === String(SELECTED_BUNDLE));
+  const journey = SELECTED_JOURNEY;
+  const journeyLabel = journey.name;
+
+  if (!bundle) {
+    showToast('Selected bundle not found', 'var(--rose)');
+    return;
+  }
+
+  const journeyDateInput = document.getElementById('s-date')?.value;
+  const taxAmount = Math.round(((journey.price + (bundle.price || 0)) * 0.05) * 100) / 100;
+  const totalAmount = journey.price + (bundle.price || 0) + taxAmount;
+
+  const canPost = isObjectId(String(journey.id)) && isObjectId(String(bundle.id));
+  const payload = {
+    userId: CURRENT_USER_ID,
+    journeyId: String(journey.id),
+    bundleId: String(bundle.id),
+    passengers: 1,
+    travelPrice: journey.price,
+    ottPrice: bundle.price || 0,
+    taxAmount,
+    totalAmount,
+    language: 'English',
+    paymentMethod: 'upi',
+    journeyDate: journeyDateInput || new Date().toISOString(),
+  };
+
+  if (!canPost) {
+    showToast(`Demo checkout ready: ${bundle.name} for ${journeyLabel}`, 'var(--amber)');
+    goto('account');
+    return;
+  }
+
+  const createBtn = document.querySelector('#bundle-checkout-summary .btn-primary');
+  if (createBtn) {
+    createBtn.disabled = true;
+    createBtn.textContent = 'Processing...';
+  }
+
+  const booking = await createBooking(payload);
+
+  if (createBtn) {
+    createBtn.disabled = false;
+    createBtn.textContent = 'Continue to Checkout';
+  }
+
+  if (booking) {
+    const ref = booking.bookingReference ? ` (${booking.bookingReference})` : '';
+    persistRecentBooking({
+      reference: booking.bookingReference || `JP-${String(booking._id || 'NEW').slice(-6).toUpperCase()}`,
+      journey: `${journey.from} -> ${journey.to}`,
+      bundle: bundle.name,
+      total: totalAmount,
+      status: booking.bookingStatus || 'confirmed',
+      dateLabel: new Date().toLocaleDateString('en-IN'),
+    });
+    showToast(`Booking confirmed${ref}`, 'var(--teal)');
+    goto('account');
+    return;
+  }
+
+  showToast('Booking API unavailable. Please try again.', 'var(--rose)');
+}
+
+function partnerBadge(partnerName) {
+  const initials = partnerName
+    .split(' ')
+    .filter(Boolean)
+    .map((chunk) => chunk[0])
+    .join('')
+    .slice(0, 3)
+    .toUpperCase();
+  return `<span class="partner-logo" title="${partnerName}">${initials} ${partnerName}</span>`;
+}
+
+function applyBundleFilters(bundles) {
+  const mode = document.getElementById('bundle-mode-filter')?.value || 'all';
+  const partnerType = document.getElementById('bundle-partner-type-filter')?.value || 'all';
+  const platform = document.getElementById('bundle-platform-filter')?.value || 'all';
+
+  return bundles.filter((bundle) => {
+    const modeOk = mode === 'all' || (bundle.eligibleModes || []).includes(mode);
+    const platformOk = platform === 'all' || (bundle.platformNames || []).includes(platform);
+
+    let partnerOk = true;
+    if (partnerType === 'airline') partnerOk = (bundle.airlinePartners || []).length > 0;
+    if (partnerType === 'railway') partnerOk = (bundle.railwayPartners || []).length > 0;
+    if (partnerType === 'hotel') partnerOk = (bundle.hotelPartners || []).length > 0;
+
+    return modeOk && platformOk && partnerOk;
+  });
+}
+
+async function renderBundles() {
+  const container = document.getElementById('all-bundles');
+  if(!container) return;
+
+  const fromApi = await fetchBundlesFromBackend();
+  const source = Array.isArray(fromApi) && fromApi.length ? fromApi.map(normalizeBundle) : BUNDLES;
+  const bundles = applyBundleFilters(source);
+
+  if (!bundles.length) {
+    container.innerHTML = `<div class="card p-6"><div class="text-muted">No bundles matched the selected filters.</div></div>`;
+    return;
+  }
+
+  const ranked = bundles
+    .map((bundle) => ({ bundle, recommendation: getBundleRecommendation(bundle) }))
+    .sort((a, b) => b.recommendation.score - a.recommendation.score);
+
+  if (!SELECTED_BUNDLE || !ranked.some((entry) => String(entry.bundle.id) === String(SELECTED_BUNDLE))) {
+    SELECTED_BUNDLE = ranked[0].bundle.id;
+  }
+
+  window.__bundleCache = ranked.map((entry) => entry.bundle);
+  const selectedEntry = ranked.find((entry) => String(entry.bundle.id) === String(SELECTED_BUNDLE)) || ranked[0];
+  renderBundleCheckoutSummary(selectedEntry);
+
+  container.innerHTML = ranked.map(({ bundle: b, recommendation: reco }) => `
+    <div class="card p-6 bundle-card ${String(b.id) === String(SELECTED_BUNDLE) ? 'bundle-selected' : ''}">
+      <div class="flex items-center justify-between">
+        <div class="bundle-title">${b.name}</div>
+        <span class="reco-pill ${reco.className}">${reco.label} · ${reco.score}%</span>
+      </div>
+      <div class="text-xs text-faint mt-1">${SELECTED_JOURNEY ? `For ${SELECTED_JOURNEY.name}` : 'Select a journey to personalize ranking'}</div>
+      <div class="bundle-price">${b.price === 0 ? 'Free' : '₹' + b.price}</div>
+      <div class="bundle-meta-row bundle-partner"><strong>Duration:</strong> ${b.hours === 999 ? 'Unlimited' : `${b.hours}h`} access</div>
+      <div class="bundle-chip-row">
+        ${(b.platformNames || []).slice(0, 5).map(p => `<span class="bundle-chip">${p}</span>`).join('')}
+      </div>
+      <div class="bundle-meta-row bundle-partner"><strong>Airline partners:</strong></div>
+      <div class="partner-logo-row">${(b.airlinePartners || []).length ? b.airlinePartners.map(partnerBadge).join('') : '<span class="bundle-chip">Not linked</span>'}</div>
+      <div class="bundle-meta-row bundle-partner"><strong>Railway partners:</strong></div>
+      <div class="partner-logo-row">${(b.railwayPartners || []).length ? b.railwayPartners.map(partnerBadge).join('') : '<span class="bundle-chip">Not linked</span>'}</div>
+      <div class="bundle-meta-row bundle-partner"><strong>Hotel partners:</strong></div>
+      <div class="partner-logo-row">${(b.hotelPartners || []).length ? b.hotelPartners.map(partnerBadge).join('') : '<span class="bundle-chip">Not linked</span>'}</div>
+      <div class="bundle-meta-row bundle-partner"><strong>Modes:</strong> ${(b.eligibleModes || []).join(', ')}</div>
+      <div class="bundle-meta-row bundle-partner"><strong>Features:</strong> ${(b.features || []).slice(0, 3).join(' • ')}</div>
+      <button class="btn btn-primary w-full mt-3" style="padding:.7rem" onclick='selectBundleById(${JSON.stringify(String(b.id))})'>${String(b.id) === String(SELECTED_BUNDLE) ? 'Selected for Checkout' : 'Select Bundle'}</button>
+    </div>
+  `).join('');
+
+  renderHomeResume();
+}
+
+// Auth
+function handleLogin() {
+  const email = document.getElementById('login-email').value;
+  if(email) {
+    localStorage.setItem('jp_user_email', email);
+    localStorage.setItem('jp_user_id', CURRENT_USER_ID);
+    showToast('Welcome back!', 'var(--teal)');
+    setTimeout(() => goto('account'), 500);
+  } else {
+    showToast('Please enter email', 'var(--rose)');
+  }
+}
+
+renderHome();
+
+// Admin dashboard helpers
+function formatInr(value) {
+  return `₹${Number(value).toLocaleString('en-IN')}`;
+}
+
+function getRangeDays() {
+  const rangeEl = document.getElementById('admin-range');
+  return Number(rangeEl ? rangeEl.value : 7);
+}
+
+function getFilteredBookings() {
+  const days = getRangeDays();
+  const maxHours = days * 24;
+  const statusEl = document.getElementById('admin-booking-filter');
+  const status = statusEl ? statusEl.value : 'all';
+
+  return ADMIN_BOOKINGS.filter(b => b.hoursAgo <= maxHours && (status === 'all' || b.status === status));
+}
+
+async function fetchAdminDashboard(days, status) {
+  try {
+    const response = await fetch(`${API_BASE}/admin/dashboard?days=${days}&status=${encodeURIComponent(status)}`);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    console.log('Admin API unavailable, using fallback dashboard data');
+    return null;
+  }
+}
+
+function statusClass(status) {
+  if (status === 'confirmed' || status === 'active') return 'status-confirmed';
+  if (status === 'pending') return 'status-pending';
+  if (status === 'cancelled' || status === 'suspended') return 'status-cancelled';
+  return 'status-pending';
+}
+
+async function fetchUserBookings(userId) {
+  try {
+    if (!userId || !isObjectId(String(userId))) return null;
+    const response = await fetch(`${API_BASE}/bookings/user/${userId}`);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    return null;
+  }
+}
+
+function getLocalBookingFallback() {
+  try {
+    const raw = localStorage.getItem('jp_recent_bookings');
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function persistRecentBooking(bookingRow) {
+  const existing = getLocalBookingFallback();
+  const merged = [bookingRow, ...existing].slice(0, 12);
+  localStorage.setItem('jp_recent_bookings', JSON.stringify(merged));
+}
+
+function renderAccountBookingsRows(rows) {
+  const target = document.getElementById('account-bookings-body');
+  if (!target) return;
+
+  target.innerHTML = rows.map((row) => `
+    <tr>
+      <td>${row.reference}</td>
+      <td>${row.journey}</td>
+      <td>${row.bundle}</td>
+      <td>${formatInr(row.total)}</td>
+      <td><span class="status-pill ${statusClass(row.status)}">${row.status}</span></td>
+      <td>${row.dateLabel}</td>
+    </tr>
+  `).join('');
+}
+
+async function renderAccount() {
+  const target = document.getElementById('account-bookings-body');
+  if (!target) return;
+
+  target.innerHTML = `<tr><td colspan="6" class="text-muted">Loading bookings...</td></tr>`;
+
+  const userId = localStorage.getItem('jp_user_id') || CURRENT_USER_ID;
+  const live = await fetchUserBookings(userId);
+
+  if (Array.isArray(live) && live.length) {
+    const normalized = live.slice(0, 12).map((b) => ({
+      reference: b.bookingReference || `JP-${String(b._id).slice(-6).toUpperCase()}`,
+      journey: b.journeyId ? `${b.journeyId.from || 'NA'} -> ${b.journeyId.to || 'NA'}` : 'Unknown route',
+      bundle: b.bundleId?.name || 'Unknown bundle',
+      total: typeof b.totalAmount === 'number'
+        ? b.totalAmount
+        : (Number(b.travelPrice || 0) + Number(b.ottPrice || 0) + Number(b.taxAmount || 0)),
+      status: b.bookingStatus || 'pending',
+      dateLabel: new Date(b.createdAt || Date.now()).toLocaleDateString('en-IN'),
+    }));
+    renderAccountBookingsRows(normalized);
+    return;
+  }
+
+  const fallback = getLocalBookingFallback();
+  if (fallback.length) {
+    renderAccountBookingsRows(fallback);
+    return;
+  }
+
+  target.innerHTML = `<tr><td colspan="6" class="text-muted">No bookings found yet. Complete one checkout to see history.</td></tr>`;
+}
+
+function renderAdminKpis(bookings, stats = null, users = ADMIN_USERS) {
+  const revenue = stats ? stats.totalRevenue : bookings.reduce((sum, b) => sum + b.amount, 0);
+  const activeUsers = stats ? stats.activeUsers : users.filter(u => u.status === 'active').length;
+  const cancelled = stats ? stats.cancelled : bookings.filter(b => b.status === 'cancelled').length;
+  const cancellationRate = stats ? Number(stats.cancellationRate).toFixed(1) : (bookings.length ? ((cancelled / bookings.length) * 100).toFixed(1) : '0.0');
+  const repeatUsers = stats ? stats.repeatUsers : new Set(bookings.map(b => b.user)).size;
+  const avgBookingValue = stats ? stats.avgBookingValue : (bookings.length ? Math.round(revenue / bookings.length) : 0);
+  const bookingCount = stats ? stats.bookingsCount : bookings.length;
+
+  const cards = [
+    {title:'Total Revenue',value:formatInr(revenue),delta:`${bookingCount} bookings in range`},
+    {title:'Active Users',value:activeUsers,delta:`${repeatUsers} users transacted`},
+    {title:'Cancellation Rate',value:`${cancellationRate}%`,delta:`${cancelled} cancelled bookings`},
+    {title:'Avg Booking Value',value:formatInr(avgBookingValue),delta:'Across selected date range'}
+  ];
+
+  const target = document.getElementById('admin-kpis');
+  if (!target) return;
+
+  target.innerHTML = cards.map(c => `
+    <div class="card p-6 kpi-card">
+      <div class="kpi-title mb-2">${c.title}</div>
+      <div class="kpi-value">${c.value}</div>
+      <div class="kpi-delta mt-2">${c.delta}</div>
+    </div>
+  `).join('');
+}
+
+function renderAdminRevenueBars(days, trend = ADMIN_REVENUE_TREND) {
+  const target = document.getElementById('admin-revenue-bars');
+  if (!target) return;
+
+  const source = Array.isArray(trend) && trend.length ? trend : ADMIN_REVENUE_TREND;
+  const rows = source.slice(-Math.min(days, source.length));
+  const max = Math.max(...rows.map(r => r.value), 1);
+
+  target.innerHTML = rows.map(r => {
+    const width = Math.round((r.value / max) * 100);
+    return `
+      <div class="bar-row">
+        <div class="bar-label">${r.label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
+        <div class="bar-value">${formatInr(r.value)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderAdminActivity(feed = ADMIN_ACTIVITY) {
+  const target = document.getElementById('admin-activity-feed');
+  if (!target) return;
+
+  target.innerHTML = (feed.length ? feed : ADMIN_ACTIVITY).map(item => `
+    <li>
+      <div class="text-sm" style="line-height:1.45">${item.text}</div>
+      <div class="text-xs text-faint mt-1">${item.mins} min ago</div>
+    </li>
+  `).join('');
+}
+
+function renderAdminTopLists(bookings, routeList = null, bundleList = null) {
+  let topRoutes = routeList;
+  let topBundles = bundleList;
+
+  if (!topRoutes || !topBundles) {
+    const routeCounts = {};
+    const bundleCounts = {};
+
+    bookings.forEach(b => {
+      routeCounts[b.route] = (routeCounts[b.route] || 0) + 1;
+      bundleCounts[b.bundle] = (bundleCounts[b.bundle] || 0) + 1;
+    });
+
+    topRoutes = Object.entries(routeCounts).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([name, count]) => ({ name, count }));
+    topBundles = Object.entries(bundleCounts).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([name, count]) => ({ name, count }));
+  }
+
+  const routeTarget = document.getElementById('admin-top-routes');
+  const bundleTarget = document.getElementById('admin-top-bundles');
+
+  if (routeTarget) {
+    routeTarget.innerHTML = (topRoutes.length ? topRoutes : [{ name: 'No route data', count: 0 }]).map(({name, count}) => `
+      <li>
+        <span>${name}</span>
+        <span class="badge badge-amber">${count} bookings</span>
+      </li>
+    `).join('');
+  }
+
+  if (bundleTarget) {
+    bundleTarget.innerHTML = (topBundles.length ? topBundles : [{ name: 'No bundle data', count: 0 }]).map(({name, count}) => `
+      <li>
+        <span>${name}</span>
+        <span class="badge badge-indigo">${count} picks</span>
+      </li>
+    `).join('');
+  }
+}
+
+function renderAdminBookingTable(bookings) {
+  const target = document.getElementById('admin-bookings-body');
+  if (!target) return;
+
+  target.innerHTML = bookings.map(b => `
+    <tr>
+      <td>${b.ref}</td>
+      <td>${b.user}</td>
+      <td>${b.route}</td>
+      <td>${b.bundle}</td>
+      <td>${formatInr(b.amount)}</td>
+      <td><span class="status-pill ${statusClass(b.status)}">${b.status}</span></td>
+      <td>${b.hoursAgo}h ago</td>
+    </tr>
+  `).join('') || `<tr><td colspan="7" class="text-muted">No bookings found for selected filters.</td></tr>`;
+}
+
+function renderAdminUsersTable(users = ADMIN_USERS) {
+  const target = document.getElementById('admin-users-body');
+  if (!target) return;
+
+  target.innerHTML = users.map(u => `
+    <tr>
+      <td>${u.name}</td>
+      <td>${u.email}</td>
+      <td><span class="badge badge-indigo">${u.plan}</span></td>
+      <td>${formatInr(u.totalSpent)}</td>
+      <td>${u.sessions}</td>
+      <td><span class="status-pill ${statusClass(u.status)}">${u.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+function exportAdminUsersCsv() {
+  const rows = ['name,email,plan,totalSpent,sessions,status'];
+  const rowsSource = window.__adminUsersCache && window.__adminUsersCache.length ? window.__adminUsersCache : ADMIN_USERS;
+  rowsSource.forEach(u => rows.push(`${u.name},${u.email},${u.plan},${u.totalSpent},${u.sessions},${u.status}`));
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', 'journeyplay-admin-users.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('Users CSV exported', 'var(--teal)');
+}
+
+async function renderAdminDashboard() {
+  const days = getRangeDays();
+  const statusEl = document.getElementById('admin-booking-filter');
+  const status = statusEl ? statusEl.value : 'all';
+
+  const live = await fetchAdminDashboard(days, status);
+  if (live) {
+    window.__adminUsersCache = live.users || [];
+    renderAdminKpis(live.bookings || [], live.kpis, live.users || []);
+    renderAdminRevenueBars(days, live.revenueTrend || []);
+    renderAdminActivity(live.activity || []);
+    renderAdminTopLists(live.bookings || [], live.topRoutes || [], live.topBundles || []);
+    renderAdminBookingTable(live.bookings || []);
+    renderAdminUsersTable(live.users || []);
+    return;
+  }
+
+  const bookings = getFilteredBookings();
+  window.__adminUsersCache = ADMIN_USERS;
+  renderAdminKpis(bookings, null, ADMIN_USERS);
+  renderAdminRevenueBars(days, ADMIN_REVENUE_TREND);
+  renderAdminActivity(ADMIN_ACTIVITY);
+  renderAdminTopLists(bookings, null, null);
+  renderAdminBookingTable(bookings);
+  renderAdminUsersTable(ADMIN_USERS);
+}
+</script>
+</body>
+</html>

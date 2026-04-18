@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>JourneyPlay — Travel + Entertainment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#020817;--surface:#0f172a;--card:#1e293b;--card2:#162032;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --indigo:#6366f1;--violet:#8b5cf6;--teal:#14b8a6;--amber:#f59e0b;
+  --rose:#f43f5e;--green:#22c55e;
+  --text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+  --radius:16px;--radius-sm:10px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;overflow-x:hidden;min-height:100vh}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--indigo);border-radius:2px}
+
+/* TYPOGRAPHY */
+.font-display{font-family:'Syne',sans-serif}
+h1,h2,h3{font-family:'Syne',sans-serif}
+
+/* NOISE */
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9998}
+
+/* ── PAGES ── */
+.page{display:none;min-height:100vh;padding-top:70px}
+.page.active{display:block}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:70px;
+  background:rgba(2,8,23,0.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 2rem}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;
+  background:linear-gradient(135deg,var(--indigo),var(--violet));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;cursor:pointer}
+.nav-links{display:flex;gap:0.25rem;list-style:none}
+.nav-links li a{padding:0.5rem 1rem;border-radius:8px;font-size:0.85rem;color:var(--text2);
+  text-decoration:none;transition:all .2s;cursor:pointer;display:block}
+.nav-links li a:hover,.nav-links li a.active{color:var(--text);background:rgba(255,255,255,0.06)}
+.nav-right{display:flex;gap:0.75rem;align-items:center}
+.nav-avatar{width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--indigo),var(--violet));
+  display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:600;cursor:pointer}
+.btn{padding:0.5rem 1.25rem;border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif;
+  cursor:pointer;transition:all .2s;border:none;font-weight:500}
+.btn-primary{background:linear-gradient(135deg,var(--indigo),var(--violet));color:#fff}
+.btn-primary:hover{opacity:0.88;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{background:rgba(255,255,255,0.06);color:var(--text)}
+.btn-lg{padding:0.75rem 2rem;font-size:1rem;border-radius:12px}
+.btn-teal{background:linear-gradient(135deg,#0d9488,var(--teal));color:#fff}
+.btn-teal:hover{opacity:0.88}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:500}
+.badge-indigo{background:rgba(99,102,241,.15);color:#a5b4fc;border:0.5px solid rgba(99,102,241,.3)}
+.badge-teal{background:rgba(20,184,166,.12);color:#5eead4;border:0.5px solid rgba(20,184,166,.25)}
+.badge-amber{background:rgba(245,158,11,.12);color:#fcd34d;border:0.5px solid rgba(245,158,11,.25)}
+.badge-rose{background:rgba(244,63,94,.12);color:#fda4af;border:0.5px solid rgba(244,63,94,.25)}
+.badge-green{background:rgba(34,197,94,.12);color:#86efac;border:0.5px solid rgba(34,197,94,.25)}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .25s}
+.card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.card-glass{background:rgba(30,41,59,0.6);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--radius)}
+
+/* ── INPUTS ── */
+input,select{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.9rem;padding:0.65rem 1rem;
+  outline:none;transition:border-color .2s;width:100%}
+input:focus,select:focus{border-color:var(--indigo)}
+input::placeholder{color:var(--text3)}
+select option{background:var(--card)}
+label{font-size:0.78rem;color:var(--text2);margin-bottom:0.4rem;display:block;font-weight:400}
+
+/* ── GRID UTILITIES ── */
+.grid{display:grid}
+.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g6{grid-template-columns:repeat(6,1fr)}
+@media(max-width:1024px){.g6{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.g6,.g4,.g3,.g2{grid-template-columns:1fr}}
+.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.flex-wrap{flex-wrap:wrap}
+
+/* ── SECTION ── */
+.section{padding:5rem 2rem}
+.container{max-width:1280px;margin:0 auto;padding:0 1.5rem}
+.section-tag{font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--indigo);margin-bottom:.75rem}
+.section-title{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;letter-spacing:-.03em;line-height:1.1;margin-bottom:1rem}
+.section-sub{font-size:1rem;color:var(--text2);line-height:1.7;max-width:50ch}
+
+/* ── ANIM ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(99,102,241,.3)}50%{box-shadow:0 0 40px rgba(139,92,246,.5)}}
+
+.anim-fade{animation:fadeUp .5s ease both}
+.anim-float{animation:float 4s ease-in-out infinite}
+
+/* ────────────────────────────────────────
+   PAGE 1 — HOME
+──────────────────────────────────────── */
+.hero{position:relative;min-height:calc(100vh - 70px);display:flex;align-items:center;overflow:hidden}
+.hero-bg{position:absolute;inset:0;pointer-events:none}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.35}
+.hero-orb-1{width:600px;height:600px;background:var(--indigo);top:-20%;left:-10%}
+.hero-orb-2{width:500px;height:500px;background:var(--violet);bottom:-20%;right:-5%}
+.hero-orb-3{width:300px;height:300px;background:var(--teal);top:40%;left:40%}
+.hero-content{position:relative;z-index:1;padding:4rem 2rem;max-width:1280px;margin:0 auto;width:100%}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;
+  background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);
+  color:#a5b4fc;padding:.4rem 1rem;border-radius:100px;font-size:.8rem;font-weight:500;margin-bottom:1.5rem}
+.hero-dot{width:7px;height:7px;border-radius:50%;background:var(--indigo);animation:pulse 2s infinite}
+.hero h1{font-size:clamp(2.8rem,7vw,5.5rem);font-weight:800;letter-spacing:-.04em;line-height:1;max-width:15ch;margin-bottom:1.5rem}
+.hero h1 .grad{background:linear-gradient(135deg,var(--indigo),var(--violet),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:1.15rem;color:var(--text2);line-height:1.7;max-width:46ch;margin-bottom:2.5rem}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
+.hero-stats{display:flex;gap:3rem;margin-top:3.5rem;padding-top:2.5rem;border-top:1px solid var(--border);flex-wrap:wrap}
+.stat-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:700;background:linear-gradient(135deg,var(--indigo),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:.8rem;color:var(--text3);margin-top:2px}
+
+/* FEATURE CARDS HOME */
+.feature-card{padding:1.75rem;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);transition:all .25s}
+.feature-card:hover{border-color:rgba(99,102,241,.4);transform:translateY(-3px)}
+.feature-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;font-size:22px}
+
+/* TRENDING SCROLLER */
+.scroll-row{display:flex;gap:1rem;overflow-x:auto;padding-bottom:.5rem;scrollbar-width:none}
+.scroll-row::-webkit-scrollbar{display:none}
+.poster{flex-shrink:0;width:140px;border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .2s;position:relative}
+.poster:hover{transform:scale(1.04)}
+.poster-img{width:140px;height:200px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;border-radius:12px}
+.poster-title{font-size:.75rem;margin-top:.5rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.poster-badge{position:absolute;top:8px;left:8px}
+
+/* MODE ICONS */
+.mode-icon-row{display:flex;gap:2rem;flex-wrap:wrap}
+.mode-icon{display:flex;flex-direction:column;align-items:center;gap:.6rem;padding:1.5rem;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);min-width:110px;cursor:pointer;transition:all .2s}
+.mode-icon:hover{border-color:rgba(99,102,241,.5);background:rgba(99,102,241,.06)}
+.mode-icon-emoji{font-size:2rem}
+.mode-icon-label{font-size:.8rem;color:var(--text2);font-weight:500}
+
+/* ────────────────────────────────────────
+   PAGE 2 — TRAVEL
+──────────────────────────────────────── */
+.travel-layout{display:grid;grid-template-columns:1fr 380px;gap:2rem;align-items:start;max-width:1280px;margin:0 auto;padding:2rem 1.5rem}
+@media(max-width:1024px){.travel-layout{grid-template-columns:1fr}}
+.travel-main{display:flex;flex-direction:column;gap:1.5rem}
+
+/* SEARCH BAR */
+.search-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem}
+.mode-tabs{display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.mode-tab{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:8px;font-size:.83rem;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);transition:all .2s;font-family:'DM Sans',sans-serif}
+.mode-tab:hover{border-color:var(--border2);color:var(--text)}
+.mode-tab.active{background:linear-gradient(135deg,var(--indigo),var(--violet));border-color:transparent;color:#fff}
+.search-grid{display:grid;grid-template-columns:repeat(5,1fr) auto;gap:.75rem;align-items:end}
+@media(max-width:900px){.search-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.search-grid{grid-template-columns:1fr}}
+
+/* JOURNEY CARDS */
+.journey-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.journey-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(99,102,241,.06),transparent);opacity:0;transition:opacity .2s}
+.journey-card:hover{border-color:rgba(99,102,241,.4);transform:translateY(-2px)}
+.journey-card:hover::before{opacity:1}
+.journey-card.selected{border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo)}
+.route-arrow{color:var(--text3);margin:0 .5rem}
+.journey-price{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:var(--indigo)}
+.journey-meta{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-top:.5rem}
+.journey-meta span{font-size:.78rem;color:var(--text2);display:flex;align-items:center;gap:.3rem}
+.journey-badge{padding:.2rem .7rem;border-radius:100px;font-size:.7rem;font-weight:500}
+
+/* OTT BUNDLE CARDS */
+.bundle-card{background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:1.25rem;cursor:pointer;transition:all .2s;position:relative}
+.bundle-card.selected{border-color:var(--indigo);background:rgba(99,102,241,.06)}
+.bundle-card:hover{border-color:var(--border2)}
+.bundle-price{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:700}
+.bundle-card.popular::before{content:'POPULAR';position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,var(--indigo),var(--violet));color:#fff;
+  padding:2px 12px;border-radius:100px;font-size:10px;font-weight:600;letter-spacing:.06em;white-space:nowrap}
+
+/* LANGUAGE CHIPS */
+.lang-chip{padding:.4rem 1rem;border-radius:100px;font-size:.83rem;font-weight:500;cursor:pointer;
+  border:1px solid var(--border);background:transparent;color:var(--text2);transition:all .2s;font-family:'DM Sans',sans-serif}
+.lang-chip.active{background:var(--teal);border-color:var(--teal);color:#fff}
+.lang-chip:hover{border-color:var(--border2);color:var(--text)}
+
+/* PREVIEW PANEL */
+.preview-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;position:sticky;top:90px}
+.preview-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem}
+.preview-row{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.88rem}
+.preview-row:last-child{border-bottom:none}
+.preview-label{color:var(--text2)}
+.preview-val{font-weight:500}
+.preview-total{display:flex;justify-content:space-between;align-items:center;padding:1rem;background:rgba(99,102,241,.08);border-radius:var(--radius-sm);margin-top:.75rem}
+.preview-total-label{font-weight:600;font-size:.95rem}
+.preview-total-val{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;color:var(--indigo)}
+
+/* ────────────────────────────────────────
+   PAGE 3 — OTT BUNDLES
+──────────────────────────────────────── */
+.filter-bar{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:2rem}
+.filter-btn{padding:.4rem 1rem;border-radius:100px;font-size:.82rem;cursor:pointer;
+  border:1px solid var(--border);background:transparent;color:var(--text2);transition:all .2s;font-family:'DM Sans',sans-serif}
+.filter-btn.active{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.filter-btn:hover{border-color:var(--border2);color:var(--text)}
+
+/* ────────────────────────────────────────
+   PAGE 4 — ACCOUNT
+──────────────────────────────────────── */
+.account-layout{display:grid;grid-template-columns:280px 1fr;gap:2rem;max-width:1280px;margin:0 auto;padding:2rem 1.5rem}
+@media(max-width:900px){.account-layout{grid-template-columns:1fr}}
+.account-sidebar{display:flex;flex-direction:column;gap:.5rem}
+.account-nav-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:10px;
+  font-size:.88rem;cursor:pointer;transition:all .2s;color:var(--text2)}
+.account-nav-item:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.account-nav-item.active{background:rgba(99,102,241,.12);color:#a5b4fc;font-weight:500}
+.profile-card{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.1));
+  border:1px solid rgba(99,102,241,.2);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;text-align:center}
+.profile-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),var(--violet));
+  display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 1rem;font-weight:700;
+  border:2px solid rgba(255,255,255,.1)}
+
+/* SESSION TIMER */
+.timer-ring{width:120px;height:120px;margin:0 auto;position:relative}
+.timer-svg circle{fill:none;stroke-width:8}
+.timer-bg{stroke:var(--border)}
+.timer-fill{stroke:var(--teal);stroke-linecap:round;stroke-dasharray:339;stroke-dashoffset:85;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 1s}
+.timer-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.timer-val{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;color:var(--teal)}
+.timer-label{font-size:.65rem;color:var(--text3);margin-top:2px}
+
+/* ────────────────────────────────────────
+   PAGE 5 — PARTNERS
+──────────────────────────────────────── */
+.partner-stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;text-align:center}
+.partner-stat-num{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:700;background:linear-gradient(135deg,var(--indigo),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.integration-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;display:flex;gap:1rem;align-items:flex-start;transition:all .25s}
+.integration-card:hover{border-color:rgba(99,102,241,.3);transform:translateY(-2px)}
+.integration-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+
+/* ────────────────────────────────────────
+   PAGE 6 — ADMIN
+──────────────────────────────────────── */
+.admin-layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 70px)}
+@media(max-width:900px){.admin-layout{grid-template-columns:1fr}}
+.admin-sidebar{background:var(--surface);border-right:1px solid var(--border);padding:1.5rem 1rem}
+.admin-nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem .9rem;border-radius:10px;
+  font-size:.85rem;cursor:pointer;transition:all .2s;color:var(--text2);margin-bottom:.25rem}
+.admin-nav-item:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.admin-nav-item.active{background:rgba(99,102,241,.15);color:#a5b4fc}
+.admin-content{padding:2rem}
+.admin-tab{display:none}
+.admin-tab.active{display:block}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-indigo::before{background:linear-gradient(90deg,var(--indigo),var(--violet))}
+.stat-teal::before{background:linear-gradient(90deg,var(--teal),#0d9488)}
+.stat-amber::before{background:linear-gradient(90deg,var(--amber),#d97706)}
+.stat-rose::before{background:linear-gradient(90deg,var(--rose),#e11d48)}
+.stat-card-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:700;margin:.5rem 0}
+.stat-card-label{font-size:.8rem;color:var(--text2);font-weight:400}
+.stat-card-change{font-size:.78rem;font-weight:500;margin-top:.25rem}
+.change-up{color:var(--green)}.change-down{color:var(--rose)}
+
+/* MINI CHART */
+.mini-chart{display:flex;align-items:flex-end;gap:3px;height:48px;margin-top:.75rem}
+.mini-bar{flex:1;border-radius:3px 3px 0 0;min-height:4px;transition:height .3s}
+
+/* REVENUE CHART */
+.rev-chart{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem}
+.rev-bars{display:flex;align-items:flex-end;gap:6px;height:160px;margin-top:1rem}
+.rev-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.rev-bar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--indigo),var(--violet));min-height:4px;transition:height .4s}
+.rev-bar-label{font-size:9px;color:var(--text3)}
+
+/* DATA TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.data-table th{padding:.75rem 1rem;text-align:left;color:var(--text2);font-weight:500;
+  border-bottom:1px solid var(--border);font-size:.78rem;text-transform:uppercase;letter-spacing:.06em}
+.data-table td{padding:.75rem 1rem;border-bottom:1px solid var(--border)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:rgba(255,255,255,.02)}
+
+/* ────────────────────────────────────────
+   PAGE 7 — LOGIN
+──────────────────────────────────────── */
+.login-wrap{min-height:calc(100vh - 70px);display:flex;align-items:center;justify-content:center;padding:2rem;position:relative}
+.login-bg-orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.25;pointer-events:none}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2.5rem;width:100%;max-width:420px;position:relative;z-index:1}
+.login-tabs{display:flex;background:var(--surface);border-radius:10px;padding:4px;margin-bottom:1.75rem}
+.login-tab{flex:1;padding:.5rem;border-radius:7px;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;color:var(--text2);border:none;background:transparent;font-family:'DM Sans',sans-serif}
+.login-tab.active{background:var(--card);color:var(--text)}
+.form-group{margin-bottom:1.1rem}
+.checkbox-row{display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--text2);cursor:pointer}
+.checkbox-row input{width:auto;accent-color:var(--indigo)}
+.forgot-link{font-size:.82rem;color:var(--indigo);cursor:pointer;text-decoration:none}
+.forgot-link:hover{text-decoration:underline}
+.divider{display:flex;align-items:center;gap:1rem;margin:1.25rem 0;color:var(--text3);font-size:.82rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.social-btn{display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;padding:.65rem;
+  border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;
+  color:var(--text2);font-size:.85rem;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.social-btn:hover{background:rgba(255,255,255,.05);color:var(--text)}
+
+/* ────────────────────────────────────────
+   PAGE 8 — BOOKING SUMMARY
+──────────────────────────────────────── */
+.booking-layout{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+.booking-step{display:flex;align-items:center;gap:.75rem;padding:1.25rem;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1rem}
+.booking-step-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),var(--violet));
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0}
+.confirm-btn{width:100%;padding:1rem;background:linear-gradient(135deg,var(--indigo),var(--violet));
+  color:#fff;border:none;border-radius:var(--radius);font-size:1rem;font-weight:600;cursor:pointer;
+  font-family:'Syne',sans-serif;transition:all .2s;margin-top:1.5rem;letter-spacing:.02em}
+.confirm-btn:hover{opacity:.88;transform:translateY(-1px)}
+
+/* ────────────────────────────────────────
+   PAGE 9 — USER SESSION
+──────────────────────────────────────── */
+.session-hero{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.08));
+  border:1px solid rgba(99,102,241,.2);border-radius:var(--radius);padding:2rem;text-align:center;margin-bottom:2rem}
+.session-active-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);margin-right:.5rem;animation:pulse 1.5s infinite}
+.watch-bar{height:8px;background:var(--surface);border-radius:4px;overflow:hidden;margin:1rem 0}
+.watch-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--indigo));border-radius:4px;transition:width .5s}
+
+/* TOAST */
+#toast{position:fixed;bottom:2rem;right:2rem;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:1rem 1.25rem;z-index:9999;transform:translateY(100px);opacity:0;
+  transition:all .3s;max-width:300px;font-size:.88rem;display:flex;align-items:center;gap:.75rem}
+#toast.show{transform:translateY(0);opacity:1}
+#toast .toast-icon{font-size:1.1rem}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:2000;
+  display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2rem;max-width:480px;width:100%;animation:fadeUp .3s ease}
+.modal-close{float:right;background:none;border:none;color:var(--text2);cursor:pointer;font-size:1.2rem;line-height:1}
+
+/* LOADING SKELETON */
+.skeleton{background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+
+/* PROGRESS BAR */
+.step-bar{display:flex;align-items:center;gap:0;margin-bottom:2rem}
+.step-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:.4rem;position:relative}
+.step-item:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:1px;background:var(--border)}
+.step-item.done:not(:last-child)::after{background:var(--indigo)}
+.step-circle{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600;
+  background:var(--bg);position:relative;z-index:1;transition:all .3s}
+.step-item.active .step-circle{border-color:var(--indigo);background:var(--indigo);color:#fff}
+.step-item.done .step-circle{border-color:var(--teal);background:var(--teal);color:#fff}
+.step-label{font-size:.7rem;color:var(--text3);white-space:nowrap}
+.step-item.active .step-label{color:var(--text2)}
+
+/* RESPONSIVE NAV */
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:.5rem}
+.nav-mobile{display:none}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .hamburger{display:flex;align-items:center}
+  .nav-mobile.open{display:flex;flex-direction:column;position:fixed;top:70px;left:0;right:0;
+    background:rgba(2,8,23,.98);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);
+    padding:1rem;gap:.5rem;z-index:999}
+  .nav-mobile a{padding:.75rem 1rem;border-radius:8px;color:var(--text2);text-decoration:none;font-size:.9rem}
+  .nav-mobile a:hover,.nav-mobile a.active{background:rgba(255,255,255,.06);color:var(--text)}
+}
+
+/* UTIL */
+.text-indigo{color:var(--indigo)}.text-teal{color:var(--teal)}.text-violet{color:var(--violet)}
+.text-amber{color:var(--amber)}.text-muted{color:var(--text2)}.text-faint{color:var(--text3)}
+.fw-700{font-weight:700}.fw-600{font-weight:600}.fw-500{font-weight:500}
+.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}
+.mt-6{margin-top:1.5rem}.mt-8{margin-top:2rem}.mt-12{margin-top:3rem}
+.mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}
+.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}
+.p-4{padding:1rem}.p-6{padding:1.5rem}.px-4{padding-left:1rem;padding-right:1rem}
+.text-sm{font-size:.85rem}.text-xs{font-size:.75rem}.text-lg{font-size:1.1rem}.text-xl{font-size:1.25rem}
+.rounded{border-radius:var(--radius-sm)}.rounded-lg{border-radius:var(--radius)}.rounded-full{border-radius:100px}
+.w-full{width:100%}.h-full{height:100%}
+.sep{height:1px;background:var(--border);margin:1.25rem 0}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ NAVBAR ═══════════════════ -->
+<nav id="main-nav">
+  <div class="nav-logo" onclick="goto('home')">Journey<span style="color:var(--teal);-webkit-text-fill-color:var(--teal)">Play</span></div>
+  <ul class="nav-links">
+    <li><a onclick="goto('home')" data-page="home">Home</a></li>
+    <li><a onclick="goto('travel')" data-page="travel">Book Travel</a></li>
+    <li><a onclick="goto('bundles')" data-page="bundles">OTT Bundles</a></li>
+    <li><a onclick="goto('partners')" data-page="partners">Partners</a></li>
+    <li><a onclick="goto('admin')" data-page="admin">Admin</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="btn btn-ghost" style="font-size:.82rem" onclick="goto('login')">Sign in</button>
+    <div class="nav-avatar" onclick="goto('account')" title="Account">AR</div>
+    <button class="hamburger" id="ham-btn" onclick="toggleMobileNav()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</nav>
+<div class="nav-mobile" id="nav-mobile">
+  <a onclick="goto('home');closeMobileNav()">Home</a>
+  <a onclick="goto('travel');closeMobileNav()">Book Travel</a>
+  <a onclick="goto('bundles');closeMobileNav()">OTT Bundles</a>
+  <a onclick="goto('partners');closeMobileNav()">Partners</a>
+  <a onclick="goto('admin');closeMobileNav()">Admin</a>
+  <a onclick="goto('account');closeMobileNav()">Account</a>
+  <a onclick="goto('login');closeMobileNav()">Sign in</a>
+</div>
+
+<!-- TOAST -->
+<div id="toast"><span class="toast-icon">✓</span><span id="toast-msg">Action completed</span></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 1 — HOME
+═══════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-bg">
+      <div class="hero-orb hero-orb-1"></div>
+      <div class="hero-orb hero-orb-2"></div>
+      <div class="hero-orb hero-orb-3"></div>
+      <!-- GRID LINES -->
+      <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.04" xmlns="http://www.w3.org/2000/svg">
+        <defs><pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M 60 0 L 0 0 0 60" fill="none" stroke="#6366f1" stroke-width="0.5"/></pattern></defs>
+        <rect width="100%" height="100%" fill="url(#grid)"/>
+      </svg>
+    </div>
+    <div class="hero-content">
+      <div class="hero-eyebrow"><span class="hero-dot"></span>Travel + Entertainment Platform</div>
+      <h1>One Ticket.<br><span class="grad">Endless</span><br>Entertainment.</h1>
+      <p class="hero-sub">Book your journey and watch your favorite OTT content during travel. Trains, flights, buses — always entertained.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary btn-lg" onclick="goto('travel')">Explore Travel</button>
+        <button class="btn btn-ghost btn-lg" onclick="goto('bundles')">View Bundles</button>
+      </div>
+      <div class="hero-stats">
+        <div><div class="stat-num">2M+</div><div class="stat-label">Travelers served</div></div>
+        <div><div class="stat-num">50+</div><div class="stat-label">OTT partners</div></div>
+        <div><div class="stat-num">15k+</div><div class="stat-label">Daily active sessions</div></div>
+        <div><div class="stat-num">12</div><div class="stat-label">Languages supported</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAVEL MODES -->
+  <section class="section" style="padding-top:3rem">
+    <div class="container">
+      <div class="section-tag">Supported Modes</div>
+      <h2 class="section-title">Travel Your Way</h2>
+      <div class="mode-icon-row mt-8">
+        <div class="mode-icon" onclick="selectModeAndGo('train')"><div class="mode-icon-emoji">🚆</div><div class="mode-icon-label">Train</div><div class="badge badge-indigo mt-2" style="font-size:10px">Popular</div></div>
+        <div class="mode-icon" onclick="selectModeAndGo('flight')"><div class="mode-icon-emoji">✈️</div><div class="mode-icon-label">Flight</div></div>
+        <div class="mode-icon" onclick="selectModeAndGo('bus')"><div class="mode-icon-emoji">🚌</div><div class="mode-icon-label">Bus</div></div>
+        <div class="mode-icon" onclick="selectModeAndGo('hotel')"><div class="mode-icon-emoji">🏨</div><div class="mode-icon-label">Hotel</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED BUNDLES -->
+  <section class="section" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div class="container">
+      <div class="section-tag">Featured</div>
+      <h2 class="section-title">Travel + Entertainment Packages</h2>
+      <p class="section-sub text-muted">Curated bundles combining best routes with top OTT content.</p>
+      <div class="grid g3 gap-6 mt-8" id="featured-packages"></div>
+    </div>
+  </section>
+
+  <!-- TRENDING CONTENT -->
+  <section class="section">
+    <div class="container">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+        <div>
+          <div class="section-tag">Trending</div>
+          <h2 class="section-title" style="margin-bottom:0">Watch During Your Journey</h2>
+        </div>
+        <button class="btn btn-ghost" onclick="goto('bundles')">View all bundles</button>
+      </div>
+      <div class="scroll-row" id="trending-row"></div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section" style="background:var(--surface);border-top:1px solid var(--border)">
+    <div class="container">
+      <div class="section-tag">Why JourneyPlay</div>
+      <h2 class="section-title">Built for Modern Travelers</h2>
+      <div class="grid g3 gap-6 mt-8">
+        <div class="feature-card"><div class="feature-icon" style="background:rgba(99,102,241,.12)">🎬</div><h3 style="font-size:1rem;margin-bottom:.5rem">50+ OTT Platforms</h3><p class="text-muted text-sm">Access content from all major streaming services in one unified platform.</p></div>
+        <div class="feature-card"><div class="feature-icon" style="background:rgba(20,184,166,.12)">⚡</div><h3 style="font-size:1rem;margin-bottom:.5rem">Instant Access</h3><p class="text-muted text-sm">Scan QR code on your ticket and start watching within seconds.</p></div>
+        <div class="feature-card"><div class="feature-icon" style="background:rgba(245,158,11,.12)">🌐</div><h3 style="font-size:1rem;margin-bottom:.5rem">12 Languages</h3><p class="text-muted text-sm">Watch content in your preferred language with regional OTT partners.</p></div>
+        <div class="feature-card"><div class="feature-icon" style="background:rgba(244,63,94,.12)">💰</div><h3 style="font-size:1rem;margin-bottom:.5rem">Bundled Pricing</h3><p class="text-muted text-sm">Save up to 40% by booking travel and OTT entertainment together.</p></div>
+        <div class="feature-card"><div class="feature-icon" style="background:rgba(139,92,246,.12)">📱</div><h3 style="font-size:1rem;margin-bottom:.5rem">No App Needed</h3><p class="text-muted text-sm">Access via mobile browser. Works on any device, anywhere.</p></div>
+        <div class="feature-card"><div class="feature-icon" style="background:rgba(34,197,94,.12)">🔒</div><h3 style="font-size:1rem;margin-bottom:.5rem">Secure Booking</h3><p class="text-muted text-sm">End-to-end encrypted bookings with instant confirmation.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 2 — TRAVEL (CORE)
+═══════════════════════════════════════════════ -->
+<div class="page" id="page-travel">
+  <div style="padding:1.5rem 1.5rem 0;max-width:1280px;margin:0 auto">
+    <div class="step-bar" id="step-bar">
+      <div class="step-item active" data-s="0"><div class="step-circle">1</div><div class="step-label">Search</div></div>
+      <div class="step-item" data-s="1"><div class="step-circle">2</div><div class="step-label">Choose Journey</div></div>
+      <div class="step-item" data-s="2"><div class="step-circle">3</div><div class="step-label">OTT Bundle</div></div>
+      <div class="step-item" data-s="3"><div class="step-circle">4</div><div class="step-label">Language</div></div>
+      <div class="step-item" data-s="4"><div class="step-circle">5</div><div class="step-label">Confirm</div></div>
+    </div>
+  </div>
+  <div class="travel-layout">
+    <div class="travel-main">
+      <!-- SEARCH BOX -->
+      <div class="search-box">
+        <div class="mode-tabs" id="mode-tabs">
+          <button class="mode-tab active" data-mode="train" onclick="setMode('train')">🚆 Train</button>
+          <button class="mode-tab" data-mode="flight" onclick="setMode('flight')">✈️ Flight</button>
+          <button class="mode-tab" data-mode="bus" onclick="setMode('bus')">🚌 Bus</button>
+          <button class="mode-tab" data-mode="hotel" onclick="setMode('hotel')">🏨 Hotel</button>
+        </div>
+        <div class="search-grid">
+          <div><label>From</label><input type="text" id="s-from" placeholder="Mumbai"/></div>
+          <div><label>To</label><input type="text" id="s-to" placeholder="Delhi"/></div>
+          <div><label>Date</label><input type="date" id="s-date"/></div>
+          <div><label>Passengers</label><select id="s-pass"><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select></div>
+          <div><label>Class</label><select id="s-class"><option>Economy</option><option>Business</option><option>First Class</option><option>Sleeper</option></select></div>
+          <div style="padding-top:1.4rem"><button class="btn btn-primary w-full" style="padding:.68rem 1rem" onclick="searchJourneys()">Search</button></div>
+        </div>
+      </div>
+
+      <!-- JOURNEY RESULTS -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+          <h3 style="font-size:1rem;font-weight:600">Available Journeys <span id="result-count" class="text-muted text-sm fw-400"></span></h3>
+          <div style="display:flex;gap:.5rem">
+            <select style="width:auto;font-size:.8rem;padding:.4rem .75rem" onchange="sortJourneys(this.value)">
+              <option value="price">Sort: Price</option>
+              <option value="duration">Sort: Duration</option>
+              <option value="rating">Sort: Rating</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid g2 gap-4" id="journey-results"></div>
+      </div>
+
+      <!-- OTT BUNDLE SELECTION -->
+      <div id="bundle-section" style="display:none">
+        <h3 style="font-size:1rem;font-weight:600;margin-bottom:1rem">Choose OTT Bundle</h3>
+        <div class="grid g4 gap-4" id="bundle-cards"></div>
+      </div>
+
+      <!-- LANGUAGE SELECTION -->
+      <div id="lang-section" style="display:none">
+        <h3 style="font-size:1rem;font-weight:600;margin-bottom:.75rem">Language Preference</h3>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap" id="lang-chips"></div>
+      </div>
+
+      <!-- CONTENT PREVIEW -->
+      <div id="content-section" style="display:none">
+        <h3 style="font-size:1rem;font-weight:600;margin-bottom:1rem">Trending in Your Language</h3>
+        <div class="scroll-row" id="content-preview-row"></div>
+      </div>
+    </div>
+
+    <!-- LIVE PREVIEW PANEL -->
+    <div>
+      <div class="preview-panel">
+        <div class="preview-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--indigo)" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Booking Summary
+        </div>
+        <div id="preview-journey-section">
+          <div style="background:var(--surface);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1rem;border:1px solid var(--border);text-align:center">
+            <div class="text-faint text-sm">Select a journey to get started</div>
+          </div>
+        </div>
+        <div class="preview-row"><span class="preview-label">Journey</span><span class="preview-val" id="pv-journey">—</span></div>
+        <div class="preview-row"><span class="preview-label">Duration</span><span class="preview-val" id="pv-duration">—</span></div>
+        <div class="preview-row"><span class="preview-label">OTT Bundle</span><span class="preview-val" id="pv-bundle">—</span></div>
+        <div class="preview-row"><span class="preview-label">Language</span><span class="preview-val" id="pv-lang">—</span></div>
+        <div class="sep"></div>
+        <div class="preview-row"><span class="preview-label">Travel Price</span><span class="preview-val" id="pv-travel-price">—</span></div>
+        <div class="preview-row"><span class="preview-label">OTT Price</span><span class="preview-val" id="pv-ott-price">—</span></div>
+        <div class="preview-row"><span class="preview-label">Taxes (5%)</span><span class="preview-val" id="pv-tax">—</span></div>
+        <div class="preview-total">
+          <span class="preview-total-label">Total</span>
+          <span class="preview-total-val" id="pv-total">₹0</span>
+        </div>
+        <button class="btn btn-primary w-full mt-4" style="padding:.8rem" onclick="proceedToBooking()">Book Travel + OTT</button>
+        <button class="btn btn-ghost w-full mt-2" style="padding:.65rem;font-size:.82rem" onclick="goto('session')">View Active Sessions</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 3 — OTT BUNDLES
+═══════════════════════════════════════════════ -->
+<div class="page" id="page-bundles">
+  <div class="container" style="padding-top:2rem;padding-bottom:4rem">
+    <div class="section-tag">All Bundles</div>
+    <h1 style="font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-.03em;margin-bottom:.5rem">OTT Entertainment Bundles</h1>
+    <p class="text-muted" style="margin-bottom:2rem">Choose the perfect entertainment pack for your journey.</p>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterBundles('all',this)">All</button>
+      <button class="filter-btn" onclick="filterBundles('free',this)">Free</button>
+      <button class="filter-btn" onclick="filterBundles('short',this)">Under 3 hrs</button>
+      <button class="filter-btn" onclick="filterBundles('long',this)">6+ hrs</button>
+      <button class="filter-btn" onclick="filterBundles('unlimited',this)">Unlimited</button>
+    </div>
+    <div class="grid g4 gap-6" id="all-bundles"></div>
+    <!-- COMPARE -->
+    <div style="margin-top:3rem">
+      <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:1.5rem">Bundle Comparison</h2>
+      <div style="overflow-x:auto">
+        <table class="data-table" style="min-width:600px">
+          <thead><tr><th>Feature</th><th>1 Hr</th><th>3 Hr</th><th>6 Hr</th><th>Full Journey</th></tr></thead>
+          <tbody>
+            <tr><td>Price</td><td class="text-teal fw-600">Free</td><td>₹29</td><td>₹49</td><td>₹79</td></tr>
+            <tr><td>Watch time</td><td>1 hour</td><td>3 hours</td><td>6 hours</td><td>Unlimited</td></tr>
+            <tr><td>HD Quality</td><td>✗</td><td><span class="text-teal">✓</span></td><td><span class="text-teal">✓</span></td><td><span class="text-teal">✓</span></td></tr>
+            <tr><td>Download</td><td>✗</td><td>✗</td><td><span class="text-teal">✓</span></td><td><span class="text-teal">✓</span></td></tr>
+            <tr><td>Multi-language</td><td>✗</td><td><span class="text-teal">✓</span></td><td><span class="text-teal">✓</span></td><td><span class="text-teal">✓</span></td></tr>
+            <tr><td>OTT platforms</td><td>5</td><td>15</td><td>30</td><td>50+</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 4 — ACCOUNT
+═══════════════════════════════════════════════ -->
+<div class="page" id="page-account">
+  <div class="account-layout">
+    <div>
+      <div class="profile-card">
+        <div class="profile-avatar">AR</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">Arjun Rao</div>
+        <div class="text-muted text-sm mt-1">arjun.rao@email.com</div>
+        <div class="mt-3"><span class="badge badge-indigo">Premium Member</span></div>
+      </div>
+      <div class="account-sidebar">
+        <div class="account-nav-item active" onclick="switchAccountTab('profile',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> My Profile</div>
+        <div class="account-nav-item" onclick="switchAccountTab('tickets',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a2 2 0 012-2h16a2 2 0 012 2v2a1 1 0 110 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2a1 1 0 110-2V9z"/></svg> My Tickets</div>
+        <div class="account-nav-item" onclick="switchAccountTab('sessions',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> Active Sessions</div>
+        <div class="account-nav-item" onclick="switchAccountTab('topup',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> Top-Up</div>
+        <div class="account-nav-item" onclick="switchAccountTab('settings',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83l-.06.06a2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg> Settings</div>
+        <div class="account-nav-item" style="color:var(--rose)" onclick="showToast('Signed out successfully','#f43f5e')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Sign Out</div>
+      </div>
+    </div>
+    <div id="account-main"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 5 — PARTNERS
+═══════════════════════════════════════════════ -->
+<div class="page" id="page-partners">
+  <div class="container" style="padding-top:2rem;padding-bottom:4rem">
+    <div class="section-tag">Partners</div>
+    <h1 style="font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-.03em;margin-bottom:.5rem">Partner Ecosystem</h1>
+    <p class="text-muted mb-8">Connecting travel companies with OTT platforms for seamless entertainment.</p>
+    <!-- STATS -->
+    <div class="grid g4 gap-4 mb-8">
+      <div class="partner-stat"><div class="partner-stat-num">120+</div><div class="text-muted text-sm mt-1">Travel Partners</div></div>
+      <div class="partner-stat"><div class="partner-stat-num">50+</div><div class="text-muted text-sm mt-1">OTT Platforms</div></div>
+      <div class="partner-stat"><div class="partner-stat-num">₹2.4Cr</div><div class="text-muted text-sm mt-1">Monthly Revenue</div></div>
+      <div class="partner-stat"><div class="partner-stat-num">98%</div><div class="text-muted text-sm mt-1">Uptime SLA</div></div>
+    </div>
+    <!-- INTEGRATIONS -->
+    <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem">Travel Integrations</h2>
+    <div class="grid g3 gap-4 mb-8" id="travel-partners"></div>
+    <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:1.25rem">OTT Platform Partners</h2>
+    <div class="grid g3 gap-4" id="ott-partners"></div>
+    <div style="margin-top:3rem;background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.08));border:1px solid rgba(99,102,241,.2);border-radius:var(--radius);padding:2.5rem;text-align:center">
+      <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:.75rem">Become a Partner</h2>
+      <p class="text-muted mb-6" style="max-width:44ch;margin-left:auto;margin-right:auto">Join our growing ecosystem and reach millions of travelers. Get dedicated support, revenue share, and analytics.</p>
+      <button class="btn btn-primary btn-lg" onclick="showPartnerModal()">Apply for Partnership</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 6 — ADMIN DASHBOARD
+═══════════════════════════════════════════════ -->
+<div class="page" id="page-admin">
+  <div class="admin-layout">
+    <div class="admin-sidebar">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:var(--text2);padding:.5rem .9rem 1rem;letter-spacing:.06em;text-transform:uppercase;font-size:.7rem">Admin Panel</div>
+      <div class="admin-nav-item active" onclick="switchAdminTab('overview',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Overview</div>
+      <div class="admin-nav-item" onclick="switchAdminTab('partners',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg> Partners</div>
+      <div class="admin-nav-item" onclick="switchAdminTab('ottmgmt',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> OTT Bundles</div>
+      <div class="admin-nav-item" onclick="switchAdminTab('users',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Users</div>
+      <div class="admin-nav-item" onclick="switchAdminTab('revenue',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> Revenue</div>
+      <div class="admin-nav-item" onclick="switchAdminTab('analytics',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Analytics</div>
+    </div>
+    <div class="admin-content">
+      <!-- OVERVIEW TAB -->
+      <div class="admin-tab active" id="tab-overview">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+          <h2 style="font-size:1.3rem;font-weight:700">Dashboard Overview</h2>
+          <span class="badge badge-green">● Live</span>
+        </div>
+        <div class="grid g4 gap-4 mb-6">
+          <div class="stat-card stat-indigo"><div class="stat-card-label">Active Sessions</div><div class="stat-card-num">14,832</div><div class="stat-card-change change-up">↑ 12% today</div><div class="mini-chart" id="mc1"></div></div>
+          <div class="stat-card stat-teal"><div class="stat-card-label">Revenue Today</div><div class="stat-card-num">₹1.2L</div><div class="stat-card-change change-up">↑ 8% vs yesterday</div><div class="mini-chart" id="mc2"></div></div>
+          <div class="stat-card stat-amber"><div class="stat-card-label">New Users</div><div class="stat-card-num">2,341</div><div class="stat-card-change change-up">↑ 5% this week</div><div class="mini-chart" id="mc3"></div></div>
+          <div class="stat-card stat-rose"><div class="stat-card-label">Avg Watch Time</div><div class="stat-card-num">2.4h</div><div class="stat-card-change change-down">↓ 2% this month</div><div class="mini-chart" id="mc4"></div></div>
+        </div>
+        <!-- REVENUE CHART -->
+        <div class="grid g2 gap-4">
+          <div class="rev-chart">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <h3 style="font-size:.95rem;font-weight:600">Monthly Revenue</h3>
+              <span class="badge badge-indigo">2024</span>
+            </div>
+            <div class="rev-bars" id="rev-bars"></div>
+          </div>
+          <div class="rev-chart">
+            <h3 style="font-size:.95rem;font-weight:600;margin-bottom:1rem">Language Usage</h3>
+            <div id="lang-chart"></div>
+          </div>
+        </div>
+        <!-- RECENT ACTIVITY -->
+        <div class="card mt-4" style="padding:1.25rem">
+          <h3 style="font-size:.95rem;font-weight:600;margin-bottom:1rem">Recent Bookings</h3>
+          <table class="data-table" id="recent-bookings-table"></table>
+        </div>
+      </div>
+      <!-- PARTNERS TAB -->
+      <div class="admin-tab" id="tab-partners">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+          <h2 style="font-size:1.3rem;font-weight:700">Partner Management</h2>
+          <button class="btn btn-primary" onclick="showToast('Partner invite sent!','var(--indigo)')">Add Partner</button>
+        </div>
+        <div class="card" style="overflow:hidden">
+          <table class="data-table" id="admin-partners-table"></table>
+        </div>
+      </div>
+      <!-- OTT BUNDLES TAB -->
+      <div class="admin-tab" id="tab-ottmgmt">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+          <h2 style="font-size:1.3rem;font-weight:700">OTT Bundle Management</h2>
+          <button class="btn btn-primary" onclick="showToast('Bundle created!','var(--indigo)')">Create Bundle</button>
+        </div>
+        <div class="card" style="overflow:hidden">
+          <table class="data-table" id="admin-bundles-table"></table>
+        </div>
+      </div>
+      <!-- USERS TAB -->
+      <div class="admin-tab" id="tab-users">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+          <h2 style="font-size:1.3rem;font-weight:700">User Management</h2>
+          <div style="display:flex;gap:.5rem"><input type="text" placeholder="Search users..." style="width:220px"/></div>
+        </div>
+        <div class="card" style="overflow:hidden">
+          <table class="data-table" id="admin-users-table"></table>
+        </div>
+      </div>
+      <!-- REVENUE TAB -->
+      <div class="admin-tab" id="tab-revenue">
+        <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:1.5rem">Revenue Analytics</h2>
+        <div class="grid g3 gap-4 mb-6">
+          <div class="stat-card stat-indigo"><div class="stat-card-label">This Month</div><div class="stat-card-num">₹24.6L</div><div class="stat-card-change change-up">↑ 18% MoM</div></div>
+          <div class="stat-card stat-teal"><div class="stat-card-label">B2B Revenue</div><div class="stat-card-num">₹14.2L</div><div class="stat-card-change change-up">↑ 22% MoM</div></div>
+          <div class="stat-card stat-amber"><div class="stat-card-label">Top-Up Revenue</div><div class="stat-card-num">₹6.8L</div><div class="stat-card-change change-up">↑ 11% MoM</div></div>
+        </div>
+        <div class="rev-chart">
+          <h3 style="font-size:.95rem;font-weight:600;margin-bottom:1rem">Revenue by Stream</h3>
+          <div id="rev-breakdown"></div>
+        </div>
+      </div>
+      <!-- ANALYTICS TAB -->
+      <div class="admin-tab" id="tab-analytics">
+        <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:1.5rem">Platform Analytics</h2>
+        <div class="grid g2 gap-4">
+          <div class="card p-6"><h3 style="font-size:.95rem;font-weight:600;margin-bottom:1rem">Top Content</h3><div id="top-content-list"></div></div>
+          <div class="card p-6"><h3 style="font-size:.95rem;font-weight:600;margin-bottom:1rem">Travel Mode Distribution</h3><div id="mode-dist"></div></div>
+          <div class="card p-6"><h3 style="font-size:.95rem;font-weight:600;margin-bottom:1rem">Sessions by Hour</h3><div id="hourly-sessions"></div></div>
+          <div class="card p-6"><h3 style="font-size:.95rem;font-weight:600;margin-bottom:1rem">Bundle Popularity</h3><div id="bundle-pop"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 7 — LOGIN
+═══════════════════════════════════════════════ -->
+<div class="page" id="page-login">
+  <div class="login-wrap">
+    <div class="login-bg-orb" style="width:400px;height:400px;background:var(--indigo);top:-10%;left:-5%"></div>
+    <div class="login-bg-orb" style="width:300px;height:300px;background:var(--violet);bottom:-5%;right:-5%"></div>
+    <div class="login-card">
+      <div style="text-align:center;margin-bottom:1.75rem">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;background:linear-gradient(135deg,var(--indigo),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.25rem">JourneyPlay</div>
+        <div class="text-muted text-sm">Your travel + entertainment companion</div>
+      </div>
+      <div class="login-tabs">
+        <button class="login-tab active" onclick="switchLoginTab('login',this)">Sign In</button>
+        <button class="login-tab" onclick="switchLoginTab('signup',this)">Create Account</button>
+      </div>
+      <!-- LOGIN FORM -->
+      <div id="login-form">
+        <div class="form-group"><label>Email address</label><input type="email" placeholder="you@example.com"/></div>
+        <div class="form-group"><label>Password</label><input type="password" placeholder="••••••••"/></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+          <label class="checkbox-row"><input type="checkbox"/> Remember me</label>
+          <a class="forgot-link">Forgot password?</a>
+        </div>
+        <button class="btn btn-primary w-full" style="padding:.75rem" onclick="handleLogin()">Sign In</button>
+        <div class="divider">or continue with</div>
+        <div class="grid g2 gap-3">
+          <button class="social-btn" onclick="showToast('Google login coming soon','var(--indigo)')">🇬 Google</button>
+          <button class="social-btn" onclick="showToast('Phone login coming soon','var(--indigo)')">📱 Phone</button>
+        </div>
+      </div>
+      <!-- SIGNUP FORM -->
+      <div id="signup-form" style="display:none">
+        <div class="grid g2 gap-3 mb-3">
+          <div class="form-group mb-0"><label>First name</label><input type="text" placeholder="Arjun"/></div>
+          <div class="form-group mb-0"><label>Last name</label><input type="text" placeholder="Rao"/></div>
+        </div>
+        <div class="form-group"><label>Email address</label><input type="email" placeholder="you@example.com"/></div>
+        <div class="form-group"><label>Password</label><input type="password" placeholder="Min. 8 characters"/></div>
+        <div class="form-group"><label>Confirm password</label><input type="password" placeholder="••••••••"/></div>
+        <label class="checkbox-row mb-4"><input type="checkbox"/> I agree to the <a class="forgot-link" style="margin-left:.25rem">Terms & Privacy</a></label>
+        <button class="btn btn-primary w-full" style="padding:.75rem" onclick="handleSignup()">Create Account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 8 — BOOKING SUMMARY
+═══════════════════════════════════════════════ -->
+<div class="page" id="page-booking">
+  <div class="booking-layout">
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem">
+      <button class="btn btn-ghost" style="padding:.4rem .8rem;font-size:.82rem" onclick="goto('travel')">← Back</button>
+      <h1 style="font-size:1.5rem;font-weight:700">Booking Confirmation</h1>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:1.5rem;align-items:start">
+      <div>
+        <div class="booking-step"><div class="booking-step-num">1</div><div><div style="font-weight:600;font-size:.95rem" id="bs-journey-title">Mumbai → Delhi Express</div><div class="text-muted text-sm mt-1" id="bs-journey-meta">Train · 15h 40m · 2 passengers</div></div><span class="badge badge-green" style="margin-left:auto">Confirmed</span></div>
+        <div class="booking-step"><div class="booking-step-num">2</div><div><div style="font-weight:600;font-size:.95rem" id="bs-bundle-title">6 Hour OTT Pack</div><div class="text-muted text-sm mt-1" id="bs-bundle-meta">HD Quality · 30 platforms · Multi-language</div></div><span class="badge badge-indigo" style="margin-left:auto">Selected</span></div>
+        <div class="booking-step"><div class="booking-step-num">3</div><div><div style="font-weight:600;font-size:.95rem" id="bs-lang-title">Hindi</div><div class="text-muted text-sm mt-1">Content preference set</div></div><span class="badge badge-teal" style="margin-left:auto">Ready</span></div>
+        <div style="background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.2);border-radius:var(--radius);padding:1.25rem;margin-top:1rem">
+          <h3 style="font-size:.95rem;font-weight:600;margin-bottom:1rem">Payment Method</h3>
+          <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+            <label class="checkbox-row"><input type="radio" name="pay" checked/> UPI</label>
+            <label class="checkbox-row"><input type="radio" name="pay"/> Card</label>
+            <label class="checkbox-row"><input type="radio" name="pay"/> Net Banking</label>
+            <label class="checkbox-row"><input type="radio" name="pay"/> Wallet</label>
+          </div>
+          <input type="text" placeholder="Enter UPI ID" style="margin-top:.75rem"/>
+        </div>
+      </div>
+      <div class="preview-panel" style="position:sticky;top:90px">
+        <div class="preview-title">Order Summary</div>
+        <div class="preview-row"><span class="preview-label">Journey</span><span class="preview-val" id="bs-pv-journey">—</span></div>
+        <div class="preview-row"><span class="preview-label">Travel</span><span class="preview-val" id="bs-travel">—</span></div>
+        <div class="preview-row"><span class="preview-label">OTT Bundle</span><span class="preview-val" id="bs-ott">—</span></div>
+        <div class="preview-row"><span class="preview-label">Taxes</span><span class="preview-val" id="bs-tax">—</span></div>
+        <div class="preview-total"><span class="preview-total-label">Total</span><span class="preview-total-val" id="bs-total">—</span></div>
+        <button class="confirm-btn" onclick="confirmBooking()">Confirm & Pay</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 9 — USER SESSION
+═══════════════════════════════════════════════ -->
+<div class="page" id="page-session">
+  <div class="container" style="padding-top:2rem;padding-bottom:4rem">
+    <h1 style="font-size:1.8rem;font-weight:700;margin-bottom:.5rem">Active Sessions</h1>
+    <p class="text-muted mb-6">Your ongoing OTT sessions during travel.</p>
+    <!-- ACTIVE SESSION HERO -->
+    <div class="session-hero">
+      <span class="session-active-dot"></span><span class="badge badge-green" style="margin-bottom:.75rem;display:inline-flex">Session Active</span>
+      <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:.25rem">Mumbai → Delhi Express</h2>
+      <div class="text-muted text-sm">Train 12952 · Seat B4 · 6 Hour OTT Pack</div>
+      <div style="display:flex;justify-content:center;gap:3rem;margin-top:1.5rem;flex-wrap:wrap">
+        <div class="timer-ring">
+          <svg viewBox="0 0 120 120" width="120" height="120">
+            <circle class="timer-bg" cx="60" cy="60" r="54"/>
+            <circle class="timer-fill" cx="60" cy="60" r="54" id="timer-circle"/>
+          </svg>
+          <div class="timer-text"><div class="timer-val" id="timer-val">4:22:15</div><div class="timer-label">Remaining</div></div>
+        </div>
+        <div style="text-align:left;display:flex;flex-direction:column;justify-content:center;gap:.5rem">
+          <div class="text-sm text-muted">Watch time used</div>
+          <div class="watch-bar" style="width:200px"><div class="watch-fill" style="width:26%"></div></div>
+          <div class="text-sm">1h 38m of 6h used</div>
+          <div class="text-sm text-muted mt-2">Currently watching</div>
+          <div style="font-weight:600">Panchayat Season 3</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="showToast('Top-up added! 3 more hours.','var(--teal)')">+ Top Up 3 Hours — ₹29</button>
+        <button class="btn btn-ghost" onclick="goto('account')">View All Sessions</button>
+      </div>
+    </div>
+    <!-- SESSION LIST -->
+    <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 .75rem">Session History</h3>
+    <div class="grid g2 gap-4" id="session-history"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════ -->
+<script>
+// ── MOCK DATA ──────────────────────────────────
+const ROUTES = [
+  {id:1,mode:'train',name:'Rajdhani Express',from:'Mumbai',to:'Delhi',dep:'06:00',arr:'21:40',duration:'15h 40m',price:1240,ottHours:6,rating:4.8,seats:42,class:'AC 2-Tier'},
+  {id:2,mode:'train',name:'Shatabdi Express',from:'Mumbai',to:'Pune',dep:'07:30',arr:'10:45',duration:'3h 15m',price:540,ottHours:3,rating:4.5,seats:120,class:'Chair Car'},
+  {id:3,mode:'flight',name:'IndiGo 6E-204',from:'Mumbai',to:'Delhi',dep:'09:15',arr:'11:30',duration:'2h 15m',price:3820,ottHours:2,rating:4.3,seats:8,class:'Economy'},
+  {id:4,mode:'flight',name:'Air India AI-102',from:'Mumbai',to:'Bangalore',dep:'14:00',arr:'15:45',duration:'1h 45m',price:4200,ottHours:2,rating:4.6,seats:15,class:'Business'},
+  {id:5,mode:'bus',name:'Neeta Travels',from:'Mumbai',to:'Goa',dep:'22:00',arr:'08:00',duration:'10h',price:680,ottHours:4,rating:4.2,seats:22,class:'Volvo AC'},
+  {id:6,mode:'bus',name:'VRL Travels',from:'Mumbai',to:'Bangalore',dep:'20:30',arr:'10:00',duration:'13h 30m',price:780,ottHours:6,rating:4.4,seats:6,class:'Sleeper'},
+  {id:7,mode:'hotel',name:'Taj Lands End',from:'Mumbai',to:'Mumbai',dep:'Check-in 2PM',arr:'Check-out 11AM',duration:'2 nights',price:8900,ottHours:12,rating:4.9,seats:0,class:'Deluxe Suite'},
+  {id:8,mode:'hotel',name:'OYO Premium Stay',from:'Delhi',to:'Delhi',dep:'Check-in 12PM',arr:'Check-out 12PM',duration:'1 night',price:1200,ottHours:6,rating:3.9,seats:0,class:'Standard'}
+];
+const BUNDLES=[
+  {id:'free',name:'1 Hour Pack',hours:1,price:0,desc:'Perfect for short commutes',features:['5 OTT platforms','SD quality','Hindi & English'],badge:'Free',color:'var(--green)',popular:false},
+  {id:'3hr',name:'3 Hour Pack',hours:3,price:29,desc:'Great for medium journeys',features:['15 OTT platforms','HD quality','5 languages'],badge:'₹29',color:'var(--indigo)',popular:false},
+  {id:'6hr',name:'6 Hour Pack',hours:6,price:49,desc:'Best for long train rides',features:['30 OTT platforms','Full HD','All languages','Downloads'],badge:'₹49',color:'var(--violet)',popular:true},
+  {id:'full',name:'Full Journey Pack',hours:999,price:79,desc:'Unlimited for your entire trip',features:['50+ OTT platforms','4K quality','All languages','Downloads','Offline mode'],badge:'₹79',color:'var(--amber)',popular:false}
+];
+const LANGUAGES=[{code:'hi',name:'Hindi'},{code:'en',name:'English'},{code:'ta',name:'Tamil'},{code:'te',name:'Telugu'},{code:'mr',name:'Marathi'},{code:'bn',name:'Bengali'},{code:'kn',name:'Kannada'},{code:'gu',name:'Gujarati'}];
+const POSTERS=[
+  {title:'Panchayat S3',genre:'Drama',emoji:'🏘️',platform:'Amazon',badge:'New'},
+  {title:'Sacred Games',genre:'Thriller',emoji:'🔫',platform:'Netflix',badge:''},
+  {title:'Mirzapur',genre:'Crime',emoji:'⚔️',platform:'Prime',badge:'Trending'},
+  {title:'Scam 1992',genre:'Finance',emoji:'📈',platform:'SonyLiv',badge:''},
+  {title:'The Family Man',genre:'Action',emoji:'🕵️',platform:'Prime',badge:'Popular'},
+  {title:'Kota Factory',genre:'Drama',emoji:'📚',platform:'Netflix',badge:'New'},
+  {title:'Aspirants',genre:'Comedy',emoji:'🎯',platform:'TVF',badge:''},
+  {title:'RRR',genre:'Action',emoji:'🔥',platform:'Netflix',badge:'Blockbuster'},
+  {title:'3 Idiots',genre:'Comedy',emoji:'🎓',platform:'JioCinema',badge:'Classic'},
+  {title:'Dangal',genre:'Sports',emoji:'🤼',platform:'Disney+',badge:''}
+];
+const USERS=[
+  {name:'Arjun Rao',email:'arjun.rao@email.com',plan:'Premium',sessions:48,spent:'₹3,240',status:'Active'},
+  {name:'Priya Sharma',email:'priya.s@email.com',plan:'Basic',sessions:12,spent:'₹480',status:'Active'},
+  {name:'Rohit Kumar',email:'rohit.k@email.com',plan:'Premium',sessions:91,spent:'₹7,100',status:'Active'},
+  {name:'Sneha Patel',email:'sneha.p@email.com',plan:'Free',sessions:3,spent:'₹0',status:'Inactive'},
+  {name:'Vikas Singh',email:'vikas.s@email.com',plan:'Business',sessions:204,spent:'₹18,200',status:'Active'}
+];
+const TRAVEL_PARTNERS=[
+  {name:'IRCTC',type:'Railway',icon:'🚆',revenue:'₹8.2L/mo',status:'Active'},
+  {name:'IndiGo',type:'Airline',icon:'✈️',revenue:'₹3.4L/mo',status:'Active'},
+  {name:'RedBus',type:'Bus',icon:'🚌',revenue:'₹1.8L/mo',status:'Active'},
+  {name:'OYO Hotels',type:'Hotel',icon:'🏨',revenue:'₹2.1L/mo',status:'Active'},
+  {name:'Air India',type:'Airline',icon:'🛩️',revenue:'₹4.0L/mo',status:'Active'},
+  {name:'MakeMyTrip',type:'Aggregator',icon:'📱',revenue:'₹5.3L/mo',status:'Active'}
+];
+const OTT_PARTNERS=[
+  {name:'Netflix India',type:'International',icon:'🎬',content:'1200+ titles',status:'Active'},
+  {name:'Amazon Prime',type:'International',icon:'📦',content:'2400+ titles',status:'Active'},
+  {name:'ZEE5',type:'Regional',icon:'⭐',content:'800+ titles',status:'Active'},
+  {name:'SonyLIV',type:'Sports & Drama',icon:'🏏',content:'600+ titles',status:'Active'},
+  {name:'JioCinema',type:'Free + Premium',icon:'💎',content:'3000+ titles',status:'Active'},
+  {name:'Hoichoi',type:'Bengali OTT',icon:'🐟',content:'400+ titles',status:'Active'}
+];
+const SESSIONS=[
+  {route:'Mumbai → Delhi',train:'Rajdhani 12952',bundle:'6 Hour Pack',used:'1h 38m',total:'6h',status:'active'},
+  {route:'Pune → Bangalore',train:'Bus VRL 421',bundle:'3 Hour Pack',used:'3h 00m',total:'3h',status:'completed'},
+  {route:'Delhi → Jaipur',train:'Shatabdi 12015',bundle:'Full Journey',used:'2h 12m',total:'∞',status:'completed'}
+];
+
+// ── STATE ──────────────────────────────────────
+const state={mode:'train',selectedJourney:null,selectedBundle:null,selectedLang:'hi',currentPage:'home'};
+
+// ── ROUTING ───────────────────────────────────
+function goto(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>{a.classList.remove('active');if(a.dataset.page===page)a.classList.add('active')});
+  state.currentPage=page;
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(page==='home')renderHome();
+  if(page==='travel')renderTravel();
+  if(page==='bundles')renderBundlePage();
+  if(page==='account')renderAccount('profile');
+  if(page==='partners')renderPartners();
+  if(page==='admin')renderAdmin();
+  if(page==='booking')renderBookingPage();
+  if(page==='session')renderSessions();
+}
+function toggleMobileNav(){document.getElementById('nav-mobile').classList.toggle('open')}
+function closeMobileNav(){document.getElementById('nav-mobile').classList.remove('open')}
+
+// ── TOAST ──────────────────────────────────────
+function showToast(msg,color='var(--teal)'){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.style.borderLeftColor=color;t.style.borderLeftWidth='3px';
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── MODAL ──────────────────────────────────────
+function openModal(html){document.getElementById('modal-content').innerHTML=html;document.getElementById('modal-overlay').classList.add('open')}
+function closeModal(e){if(e.target===document.getElementById('modal-overlay'))document.getElementById('modal-overlay').classList.remove('open')}
+function closeModalDirect(){document.getElementById('modal-overlay').classList.remove('open')}
+
+// ── HOME ───────────────────────────────────────
+function renderHome(){
+  // Trending
+  const row=document.getElementById('trending-row');
+  if(!row)return;
+  row.innerHTML=POSTERS.map(p=>`
+    <div class="poster" onclick="showToast('${p.title} added to watchlist','var(--violet)')">
+      <div class="poster-img" style="background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(139,92,246,.15))">${p.emoji}</div>
+      ${p.badge?`<span class="poster-badge badge badge-indigo" style="font-size:9px">${p.badge}</span>`:''}
+      <div class="poster-title">${p.title}</div>
+      <div style="font-size:10px;color:var(--text3)">${p.platform}</div>
+    </div>`).join('');
+  // Featured packages
+  const fp=document.getElementById('featured-packages');
+  if(fp)fp.innerHTML=[
+    {route:'Mumbai → Delhi',mode:'🚆',duration:'15h 40m',ott:'6 Hour Pack',price:'₹1,289',save:'Save ₹200',color:'rgba(99,102,241,.12)',border:'rgba(99,102,241,.25)'},
+    {route:'Delhi → Bangalore',mode:'✈️',duration:'2h 30m',ott:'3 Hour Pack',price:'₹4,049',save:'Save ₹120',color:'rgba(20,184,166,.08)',border:'rgba(20,184,166,.2)'},
+    {route:'Mumbai → Goa',mode:'🚌',duration:'10h',ott:'Full Journey',price:'₹759',save:'Save ₹80',color:'rgba(245,158,11,.08)',border:'rgba(245,158,11,.2)'}
+  ].map(p=>`
+    <div style="background:${p.color};border:1px solid ${p.border};border-radius:var(--radius);padding:1.5rem;cursor:pointer;transition:transform .2s" 
+         onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''" onclick="goto('travel')">
+      <div style="font-size:1.8rem;margin-bottom:.75rem">${p.mode}</div>
+      <div style="font-weight:700;font-size:1.05rem;margin-bottom:.25rem">${p.route}</div>
+      <div class="text-muted text-sm mb-3">${p.duration} · ${p.ott}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem">${p.price}</span>
+        <span class="badge badge-green">${p.save}</span>
+      </div>
+    </div>`).join('');
+}
+
+// ── TRAVEL ─────────────────────────────────────
+function renderTravel(){
+  const today=new Date().toISOString().split('T')[0];
+  const d=document.getElementById('s-date');if(d)d.value=today;
+  searchJourneys();
+  renderBundleCards();
+  renderLangChips();
+  renderContentPreview();
+  updatePreview();
+}
+function setMode(m){
+  state.mode=m;
+  document.querySelectorAll('.mode-tab').forEach(t=>{t.classList.toggle('active',t.dataset.mode===m)});
+  searchJourneys();
+}
+function searchJourneys(){
+  const results=ROUTES.filter(r=>r.mode===state.mode);
+  const container=document.getElementById('journey-results');
+  const count=document.getElementById('result-count');
+  if(count)count.textContent=`(${results.length} found)`;
+  if(!container)return;
+  container.innerHTML=results.map(r=>journeyCardHTML(r)).join('');
+  document.getElementById('bundle-section').style.display='block';
+  document.getElementById('lang-section').style.display='block';
+  document.getElementById('content-section').style.display='block';
+  advanceStep(1);
+}
+function journeyCardHTML(r){
+  const modeColors={train:'rgba(99,102,241,.12)',flight:'rgba(20,184,166,.1)',bus:'rgba(245,158,11,.1)',hotel:'rgba(139,92,246,.1)'};
+  const modeEmoji={train:'🚆',flight:'✈️',bus:'🚌',hotel:'🏨'};
+  const isSelected=state.selectedJourney&&state.selectedJourney.id===r.id;
+  return `<div class="journey-card${isSelected?' selected':''}" onclick="selectJourney(${r.id})" style="border-color:${isSelected?'var(--indigo)':'var(--border)'}">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem">
+      <div>
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
+          <span style="font-size:1.1rem">${modeEmoji[r.mode]}</span>
+          <span style="font-weight:600;font-size:.95rem">${r.name}</span>
+          <span class="badge badge-teal" style="font-size:9px">${r.class}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;font-size:1rem;font-weight:500">
+          <span>${r.from}</span><span style="color:var(--text3)">→</span><span>${r.to}</span>
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="journey-price">₹${r.price.toLocaleString()}</div>
+        <div style="font-size:.72rem;color:var(--text3)">per person</div>
+      </div>
+    </div>
+    <div class="journey-meta" style="margin-top:.75rem">
+      <span>🕐 ${r.dep}${r.arr?' – '+r.arr:''}</span>
+      <span>⏱ ${r.duration}</span>
+      <span>⭐ ${r.rating}</span>
+      ${r.seats>0?`<span>💺 ${r.seats} seats</span>`:''}
+      <span class="badge badge-indigo" style="font-size:10px">🎬 ${r.ottHours===999?'∞':r.ottHours+'h'} OTT Free</span>
+    </div>
+    <button class="btn btn-primary w-full mt-3" style="padding:.6rem;font-size:.83rem" onclick="event.stopPropagation();selectJourney(${r.id})">
+      ${isSelected?'✓ Selected':'Select Journey'}
+    </button>
+  </div>`;
+}
+function selectJourney(id){
+  state.selectedJourney=ROUTES.find(r=>r.id===id);
+  searchJourneys();
+  updatePreview();
+  advanceStep(2);
+  showToast('Journey selected!','var(--indigo)');
+}
+function renderBundleCards(){
+  const c=document.getElementById('bundle-cards');if(!c)return;
+  c.innerHTML=BUNDLES.map(b=>`
+    <div class="bundle-card${b.popular?' popular':''}" onclick="selectBundle('${b.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem">
+        <div style="font-weight:700;font-size:.95rem">${b.name}</div>
+        <span class="badge" style="background:rgba(99,102,241,.12);color:#a5b4fc;font-size:10px">${b.badge}</span>
+      </div>
+      <div class="bundle-price" style="color:${b.color}">${b.price===0?'Free':'₹'+b.price}</div>
+      <div class="text-muted text-xs mt-1 mb-3">${b.desc}</div>
+      <div style="display:flex;flex-direction:column;gap:.25rem">
+        ${b.features.map(f=>`<div style="font-size:.75rem;color:var(--text2);display:flex;align-items:center;gap:.35rem"><span style="color:var(--teal)">✓</span>${f}</div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+function selectBundle(id){
+  state.selectedBundle=BUNDLES.find(b=>b.id===id);
+  document.querySelectorAll('.bundle-card').forEach((c,i)=>{c.classList.toggle('selected',BUNDLES[i].id===id)});
+  updatePreview();advanceStep(3);
+  showToast(`${state.selectedBundle.name} selected`,'var(--violet)');
+}
+function renderLangChips(){
+  const c=document.getElementById('lang-chips');if(!c)return;
+  c.innerHTML=LANGUAGES.map(l=>`<button class="lang-chip${l.code===state.selectedLang?' active':''}" onclick="selectLang('${l.code}')">${l.name}</button>`).join('');
+}
+function selectLang(code){
+  state.selectedLang=code;
+  document.querySelectorAll('.lang-chip').forEach((c,i)=>{c.classList.toggle('active',LANGUAGES[i].code===code)});
+  updatePreview();advanceStep(4);
+  renderContentPreview();
+}
+function renderContentPreview(){
+  const c=document.getElementById('content-preview-row');if(!c)return;
+  c.innerHTML=POSTERS.map(p=>`
+    <div class="poster" onclick="showToast('Playing ${p.title}...','var(--violet)')">
+      <div class="poster-img" style="background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(139,92,246,.15))">${p.emoji}</div>
+      <div class="poster-title">${p.title}</div>
+      <div style="font-size:10px;color:var(--text3)">${p.genre}</div>
+    </div>`).join('');
+}
+function sortJourneys(by){
+  const results=[...ROUTES.filter(r=>r.mode===state.mode)];
+  results.sort((a,b)=>by==='price'?a.price-b.price:by==='rating'?b.rating-a.rating:a.duration.localeCompare(b.duration));
+  const c=document.getElementById('journey-results');if(c)c.innerHTML=results.map(journeyCardHTML).join('');
+}
+function updatePreview(){
+  const j=state.selectedJourney,b=state.selectedBundle,l=LANGUAGES.find(x=>x.code===state.selectedLang);
+  const tv=id=>document.getElementById(id);
+  if(j){
+    tv('pv-journey')&&(tv('pv-journey').textContent=j.from+' → '+j.to);
+    tv('pv-duration')&&(tv('pv-duration').textContent=j.duration);
+    tv('pv-travel-price')&&(tv('pv-travel-price').textContent='₹'+j.price.toLocaleString());
+    tv('preview-journey-section')&&(tv('preview-journey-section').innerHTML=`<div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:var(--radius-sm);padding:.75rem;margin-bottom:.75rem;font-size:.85rem"><div style="font-weight:600">✓ ${j.name}</div><div class="text-muted text-xs mt-1">${j.from} → ${j.to} · ${j.duration}</div></div>`);
+  }
+  if(b){tv('pv-bundle')&&(tv('pv-bundle').textContent=b.name);tv('pv-ott-price')&&(tv('pv-ott-price').textContent=b.price?'₹'+b.price:'Free')}
+  if(l){tv('pv-lang')&&(tv('pv-lang').textContent=l.name)}
+  const travel=j?j.price:0,ott=b?b.price:0,tax=Math.round((travel+ott)*0.05),total=travel+ott+tax;
+  tv('pv-tax')&&(tv('pv-tax').textContent=tax?'₹'+tax:'—');
+  tv('pv-total')&&(tv('pv-total').textContent='₹'+total.toLocaleString());
+}
+function advanceStep(n){
+  document.querySelectorAll('.step-item').forEach((s,i)=>{
+    s.classList.toggle('active',i===n);
+    s.classList.toggle('done',i<n);
+  });
+}
+function proceedToBooking(){
+  if(!state.selectedJourney){showToast('Please select a journey first','var(--rose)');return}
+  goto('booking');
+}
+
+// ── BUNDLE PAGE ────────────────────────────────
+function renderBundlePage(){
+  const c=document.getElementById('all-bundles');if(!c)return;
+  c.innerHTML=BUNDLES.map(b=>`
+    <div class="card" style="padding:2rem;position:relative${b.popular?';border-color:rgba(99,102,241,.4)':''}">
+      ${b.popular?'<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--indigo),var(--violet));color:#fff;padding:3px 14px;border-radius:100px;font-size:10px;font-weight:600;white-space:nowrap">MOST POPULAR</div>':''}
+      <div style="font-size:2rem;margin-bottom:1rem">${b.hours===999?'♾️':b.hours+'⏱'}</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:.25rem">${b.name}</div>
+      <div class="text-muted text-sm mb-3">${b.desc}</div>
+      <div style="font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;color:${b.color};margin-bottom:1.25rem">${b.price?'₹'+b.price:'Free'}</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem">
+        ${b.features.map(f=>`<div style="font-size:.85rem;color:var(--text2);display:flex;align-items:center;gap:.5rem"><span style="color:var(--teal)">✓</span>${f}</div>`).join('')}
+      </div>
+      <button class="btn ${b.popular?'btn-primary':'btn-ghost'} w-full" style="padding:.7rem" onclick="showToast('${b.name} selected!','var(--indigo)');goto('travel')">
+        ${b.price?'Get Bundle':'Start Free'}
+      </button>
+    </div>`).join('');
+}
+function filterBundles(f,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // For demo all show same
+  showToast('Filtered: '+f,'var(--indigo)');
+}
+
+// ── ACCOUNT ────────────────────────────────────
+function renderAccount(tab){
+  const m=document.getElementById('account-main');if(!m)return;
+  const tabs={
+    profile:`<div>
+      <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:1.5rem">Profile Settings</h2>
+      <div class="card p-6 mb-4">
+        <div class="grid g2 gap-4">
+          <div class="form-group"><label>First name</label><input value="Arjun"/></div>
+          <div class="form-group"><label>Last name</label><input value="Rao"/></div>
+          <div class="form-group"><label>Email</label><input value="arjun.rao@email.com"/></div>
+          <div class="form-group"><label>Phone</label><input value="+91 98765 43210"/></div>
+          <div class="form-group"><label>City</label><input value="Mumbai"/></div>
+          <div class="form-group"><label>Preferred language</label><select><option>Hindi</option><option>English</option><option>Tamil</option></select></div>
+        </div>
+        <button class="btn btn-primary mt-4" onclick="showToast('Profile updated!','var(--teal)')">Save Changes</button>
+      </div>
+      <div class="card p-6">
+        <h3 style="font-size:.95rem;font-weight:600;margin-bottom:1rem">Watch Time Stats</h3>
+        <div class="grid g3 gap-4">
+          <div style="background:var(--surface);border-radius:var(--radius-sm);padding:1rem;text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.5rem;color:var(--indigo)">48h</div><div class="text-muted text-xs mt-1">Total watched</div></div>
+          <div style="background:var(--surface);border-radius:var(--radius-sm);padding:1rem;text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.5rem;color:var(--teal)">23</div><div class="text-muted text-xs mt-1">Journeys booked</div></div>
+          <div style="background:var(--surface);border-radius:var(--radius-sm);padding:1rem;text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.5rem;color:var(--violet)">₹3,240</div><div class="text-muted text-xs mt-1">Total spent</div></div>
+        </div>
+      </div>
+    </div>`,
+    tickets:`<div><h2 style="font-size:1.2rem;font-weight:700;margin-bottom:1.5rem">My Tickets</h2>
+      ${[{route:'Mumbai → Delhi',date:'Dec 12, 2024',train:'Rajdhani Express',bundle:'6 Hour Pack',status:'Upcoming',price:'₹1,289'},
+         {route:'Pune → Goa',date:'Nov 28, 2024',train:'Bus VRL',bundle:'Full Journey',status:'Completed',price:'₹759'},
+         {route:'Delhi → Jaipur',date:'Nov 10, 2024',train:'Shatabdi Express',bundle:'3 Hour Pack',status:'Completed',price:'₹569'}].map(t=>`
+        <div class="card p-4 mb-3" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+          <div style="flex:1;min-width:180px"><div style="font-weight:600">${t.route}</div><div class="text-muted text-sm mt-1">${t.train} · ${t.date}</div><div class="text-xs text-faint mt-1">Bundle: ${t.bundle}</div></div>
+          <div style="text-align:right;flex-shrink:0"><div style="font-family:'Syne',sans-serif;font-weight:700">${t.price}</div><span class="badge mt-2 ${t.status==='Upcoming'?'badge-indigo':'badge-green'}">${t.status}</span></div>
+        </div>`).join('')}
+    </div>`,
+    sessions:`<div><h2 style="font-size:1.2rem;font-weight:700;margin-bottom:1.5rem">Active Sessions</h2>
+      ${SESSIONS.map(s=>`
+        <div class="card p-4 mb-3">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
+            <div><div style="font-weight:600">${s.route}</div><div class="text-muted text-xs mt-1">${s.train} · ${s.bundle}</div></div>
+            <span class="badge ${s.status==='active'?'badge-green':'badge-amber'}">${s.status==='active'?'● Active':'Completed'}</span>
+          </div>
+          <div style="margin-top:.75rem"><div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--text2);margin-bottom:.35rem"><span>Watch progress</span><span>${s.used} / ${s.total}</span></div>
+          <div class="watch-bar"><div class="watch-fill" style="width:${s.status==='completed'?'100':'26'}%"></div></div></div>
+          ${s.status==='active'?`<button class="btn btn-primary mt-3" style="font-size:.8rem;padding:.5rem 1rem" onclick="showToast('3 hours added!','var(--teal)')">+ Top Up</button>`:''}
+        </div>`).join('')}
+    </div>`,
+    topup:`<div><h2 style="font-size:1.2rem;font-weight:700;margin-bottom:1.5rem">Top-Up Hours</h2>
+      <div class="card p-4 mb-4" style="background:linear-gradient(135deg,rgba(20,184,166,.1),rgba(99,102,241,.08));border-color:rgba(20,184,166,.2)">
+        <div class="text-sm text-muted mb-1">Current balance</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:2.5rem;color:var(--teal)">4h 22m</div>
+      </div>
+      <div class="grid g2 gap-4">
+        ${[{h:'1 Hour',p:'₹19',color:'var(--indigo)'},{h:'3 Hours',p:'₹29',color:'var(--violet)'},{h:'6 Hours',p:'₹49',color:'var(--teal)'},{h:'12 Hours',p:'₹79',color:'var(--amber)'}].map(t=>`
+          <div class="card p-4" style="text-align:center;cursor:pointer" onclick="showToast('${t.h} added!','var(--teal)')">
+            <div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;color:${t.color}">${t.h}</div>
+            <div style="font-weight:600;margin-top:.25rem">${t.p}</div>
+            <button class="btn btn-primary w-full mt-3" style="padding:.55rem">Buy Now</button>
+          </div>`).join('')}
+      </div>
+    </div>`,
+    settings:`<div><h2 style="font-size:1.2rem;font-weight:700;margin-bottom:1.5rem">Settings</h2>
+      <div class="card p-6">
+        ${[{label:'Email notifications',checked:true},{label:'Push notifications',checked:true},{label:'Marketing emails',checked:false},{label:'Journey reminders',checked:true},{label:'Bundle expiry alerts',checked:true}].map(s=>`
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--border)">
+            <span class="text-sm">${s.label}</span>
+            <label style="position:relative;width:40px;height:22px;cursor:pointer">
+              <input type="checkbox" ${s.checked?'checked':''} style="opacity:0;width:0;height:0" onchange="showToast('Setting updated','var(--teal)')"/>
+              <span style="position:absolute;inset:0;background:${s.checked?'var(--indigo)':'var(--border)'};border-radius:100px;transition:.3s"></span>
+              <span style="position:absolute;left:${s.checked?'20':'2'}px;top:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.3s"></span>
+            </label>
+          </div>`).join('')}
+      </div>
+    </div>`
+  };
+  m.innerHTML=tabs[tab]||tabs.profile;
+}
+function switchAccountTab(tab,el){
+  document.querySelectorAll('.account-nav-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  renderAccount(tab);
+}
+
+// ── PARTNERS ───────────────────────────────────
+function renderPartners(){
+  const tp=document.getElementById('travel-partners');
+  if(tp)tp.innerHTML=TRAVEL_PARTNERS.map(p=>`
+    <div class="integration-card">
+      <div class="integration-icon" style="background:rgba(99,102,241,.1)">${p.icon}</div>
+      <div><div style="font-weight:600">${p.name}</div><div class="text-muted text-sm mt-1">${p.type}</div>
+      <div style="display:flex;align-items:center;gap:.75rem;margin-top:.75rem;flex-wrap:wrap">
+        <span class="badge badge-green" style="font-size:10px">● ${p.status}</span>
+        <span class="text-xs text-muted">${p.revenue}</span>
+      </div></div>
+    </div>`).join('');
+  const op=document.getElementById('ott-partners');
+  if(op)op.innerHTML=OTT_PARTNERS.map(p=>`
+    <div class="integration-card">
+      <div class="integration-icon" style="background:rgba(139,92,246,.1)">${p.icon}</div>
+      <div><div style="font-weight:600">${p.name}</div><div class="text-muted text-sm mt-1">${p.type}</div>
+      <div style="display:flex;align-items:center;gap:.75rem;margin-top:.75rem;flex-wrap:wrap">
+        <span class="badge badge-green" style="font-size:10px">● ${p.status}</span>
+        <span class="text-xs text-muted">${p.content}</span>
+      </div></div>
+    </div>`).join('');
+}
+function showPartnerModal(){
+  openModal(`
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:1.25rem">Partner Application</h2>
+    <div class="form-group"><label>Company name</label><input placeholder="Your company"/></div>
+    <div class="form-group"><label>Partner type</label><select><option>Travel Company</option><option>OTT Platform</option><option>Hotel Chain</option><option>Other</option></select></div>
+    <div class="form-group"><label>Email</label><input type="email" placeholder="business@company.com"/></div>
+    <div class="form-group"><label>Monthly users (approx)</label><input placeholder="e.g. 50,000"/></div>
+    <button class="btn btn-primary w-full mt-2" style="padding:.75rem" onclick="showToast('Application submitted!','var(--teal)');closeModalDirect()">Submit Application</button>`);
+}
+
+// ── ADMIN ──────────────────────────────────────
+function renderAdmin(){
+  renderMiniCharts();renderRevBars();renderAdminTables();renderAnalytics();renderLangChart();renderRevBreakdown();
+}
+function renderMiniCharts(){
+  const data=[[30,45,28,60,52,70,48],[40,60,45,80,70,90,65],[20,35,28,45,38,55,42],[55,48,62,40,58,45,70]];
+  data.forEach((d,i)=>{
+    const c=document.getElementById('mc'+(i+1));if(!c)return;
+    const max=Math.max(...d);
+    c.innerHTML=d.map(v=>`<div class="mini-bar" style="height:${(v/max*44)+4}px;background:${i===0?'var(--indigo)':i===1?'var(--teal)':i===2?'var(--amber)':'var(--rose)'}"></div>`).join('');
+  });
+}
+function renderRevBars(){
+  const months=['J','F','M','A','M','J','J','A','S','O','N','D'];
+  const vals=[45,62,58,78,82,95,88,102,96,115,108,124];
+  const max=Math.max(...vals);
+  const c=document.getElementById('rev-bars');if(!c)return;
+  c.innerHTML=vals.map((v,i)=>`<div class="rev-bar-wrap"><div class="rev-bar" style="height:${(v/max*150)+4}px"></div><div class="rev-bar-label">${months[i]}</div></div>`).join('');
+}
+function renderLangChart(){
+  const langs=[{l:'Hindi',pct:42,color:'var(--indigo)'},{l:'English',pct:28,color:'var(--teal)'},{l:'Tamil',pct:12,color:'var(--violet)'},{l:'Telugu',pct:8,color:'var(--amber)'},{l:'Other',pct:10,color:'var(--text3)'}];
+  const c=document.getElementById('lang-chart');if(!c)return;
+  c.innerHTML=langs.map(l=>`<div style="margin-bottom:.75rem"><div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.3rem"><span>${l.l}</span><span style="font-weight:600">${l.pct}%</span></div><div style="height:6px;background:var(--border);border-radius:3px"><div style="height:100%;width:${l.pct}%;background:${l.color};border-radius:3px"></div></div></div>`).join('');
+}
+function renderAdminTables(){
+  // Recent bookings
+  const rb=document.getElementById('recent-bookings-table');
+  if(rb)rb.innerHTML=`<thead><tr><th>User</th><th>Route</th><th>Mode</th><th>Bundle</th><th>Amount</th><th>Status</th></tr></thead><tbody>`+
+    [{u:'Arjun Rao',r:'Mumbai → Delhi',m:'🚆 Train',b:'6Hr Pack',a:'₹1,289',s:'confirmed'},
+     {u:'Priya S.',r:'Delhi → Bangalore',m:'✈️ Flight',b:'3Hr Pack',a:'₹4,049',s:'confirmed'},
+     {u:'Rohit K.',r:'Mumbai → Goa',m:'🚌 Bus',b:'Full Journey',a:'₹759',s:'pending'},
+     {u:'Sneha P.',r:'Chennai → Mumbai',m:'🚆 Train',b:'1Hr Pack',a:'₹1,080',s:'confirmed'}]
+    .map(r=>`<tr><td>${r.u}</td><td>${r.r}</td><td>${r.m}</td><td>${r.b}</td><td style="font-weight:600">${r.a}</td><td><span class="badge ${r.s==='confirmed'?'badge-green':'badge-amber'}">${r.s}</span></td></tr>`).join('')+'</tbody>';
+  // Partners
+  const ap=document.getElementById('admin-partners-table');
+  if(ap)ap.innerHTML=`<thead><tr><th>Partner</th><th>Type</th><th>Revenue</th><th>Users</th><th>Status</th><th>Action</th></tr></thead><tbody>`+
+    TRAVEL_PARTNERS.map(p=>`<tr><td>${p.icon} ${p.name}</td><td>${p.type}</td><td style="font-weight:600;color:var(--teal)">${p.revenue}</td><td>${Math.floor(Math.random()*50000+10000).toLocaleString()}</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-ghost" style="font-size:.75rem;padding:.3rem .6rem" onclick="showToast('Editing ${p.name}','var(--indigo)')">Edit</button></td></tr>`).join('')+'</tbody>';
+  // Bundles table
+  const ab=document.getElementById('admin-bundles-table');
+  if(ab)ab.innerHTML=`<thead><tr><th>Bundle</th><th>Hours</th><th>Price</th><th>Sold (30d)</th><th>Revenue</th><th>Action</th></tr></thead><tbody>`+
+    BUNDLES.map(b=>`<tr><td style="font-weight:600">${b.name}</td><td>${b.hours===999?'∞':b.hours+'h'}</td><td>${b.price?'₹'+b.price:'Free'}</td><td>${Math.floor(Math.random()*5000+1000).toLocaleString()}</td><td style="color:var(--teal);font-weight:600">₹${Math.floor(Math.random()*200000+50000).toLocaleString()}</td><td><button class="btn btn-ghost" style="font-size:.75rem;padding:.3rem .6rem" onclick="showToast('Editing bundle','var(--indigo)')">Edit</button></td></tr>`).join('')+'</tbody>';
+  // Users
+  const au=document.getElementById('admin-users-table');
+  if(au)au.innerHTML=`<thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Sessions</th><th>Total Spent</th><th>Status</th></tr></thead><tbody>`+
+    USERS.map(u=>`<tr><td style="font-weight:500">${u.name}</td><td class="text-muted">${u.email}</td><td><span class="badge ${u.plan==='Premium'?'badge-indigo':u.plan==='Business'?'badge-violet':'badge-amber'}" style="font-size:10px">${u.plan}</span></td><td>${u.sessions}</td><td style="font-weight:600">${u.spent}</td><td><span class="badge ${u.status==='Active'?'badge-green':'badge-amber'}">${u.status}</span></td></tr>`).join('')+'</tbody>';
+}
+function renderAnalytics(){
+  const tc=document.getElementById('top-content-list');
+  if(tc)tc.innerHTML=POSTERS.slice(0,5).map((p,i)=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--border)"><div style="width:22px;text-align:center;font-size:.8rem;font-weight:600;color:var(--text3)">${i+1}</div><div style="font-size:1.2rem">${p.emoji}</div><div style="flex:1"><div style="font-size:.88rem;font-weight:500">${p.title}</div><div class="text-xs text-muted">${p.platform}</div></div><div class="text-sm text-indigo fw-600">${Math.floor(Math.random()*5000+500).toLocaleString()} views</div></div>`).join('');
+  const md=document.getElementById('mode-dist');
+  if(md)md.innerHTML=[{m:'Train',p:52,c:'var(--indigo)'},{m:'Flight',p:28,c:'var(--teal)'},{m:'Bus',p:14,c:'var(--amber)'},{m:'Hotel',p:6,c:'var(--violet)'}]
+    .map(x=>`<div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem"><div style="width:60px;text-align:right;font-size:.8rem;font-weight:500">${x.m}</div><div style="flex:1;height:8px;background:var(--border);border-radius:4px"><div style="height:100%;width:${x.p}%;background:${x.c};border-radius:4px"></div></div><div style="width:36px;font-size:.8rem;font-weight:600;color:${x.c}">${x.p}%</div></div>`).join('');
+  const hs=document.getElementById('hourly-sessions');
+  const hrs=[5,8,12,22,38,55,70,82,76,65,72,88,95,80,68,72,85,98,102,96,88,72,52,30];
+  const hmax=Math.max(...hrs);
+  if(hs)hs.innerHTML=`<div style="display:flex;align-items:flex-end;gap:2px;height:80px">`+hrs.map((v,i)=>`<div style="flex:1;background:var(--indigo);opacity:${0.3+(v/hmax*.7)};border-radius:2px 2px 0 0;height:${(v/hmax*76)+4}px;min-width:4px" title="${i}:00 - ${v}k sessions"></div>`).join('')+'</div><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-top:4px"><span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>12am</span></div>';
+  const bp=document.getElementById('bundle-pop');
+  if(bp)bp.innerHTML=BUNDLES.map((b,i)=>{const pct=[15,28,42,15][i];return`<div style="margin-bottom:.75rem"><div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.3rem"><span>${b.name}</span><span style="font-weight:600">${pct}%</span></div><div style="height:8px;background:var(--border);border-radius:4px"><div style="height:100%;width:${pct}%;background:${b.color};border-radius:4px"></div></div></div>`}).join('');
+}
+function renderRevBreakdown(){
+  const c=document.getElementById('rev-breakdown');if(!c)return;
+  c.innerHTML=[{l:'B2B Subscriptions',v:57.7,color:'var(--indigo)'},{l:'User Top-Ups',v:27.6,color:'var(--violet)'},{l:'Data Analytics',v:9.8,color:'var(--teal)'},{l:'Other',v:4.9,color:'var(--amber)'}]
+    .map(x=>`<div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.9rem"><div style="width:12px;height:12px;border-radius:3px;background:${x.color};flex-shrink:0"></div><div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.3rem"><span>${x.l}</span><span style="font-weight:600">₹${x.v}L</span></div><div style="height:6px;background:var(--border);border-radius:3px"><div style="height:100%;width:${(x.v/57.7*100).toFixed(0)}%;background:${x.color};border-radius:3px"></div></div></div></div>`).join('');
+}
+function switchAdminTab(tab,el){
+  document.querySelectorAll('.admin-nav-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+// ── LOGIN ──────────────────────────────────────
+function switchLoginTab(tab,el){
+  document.querySelectorAll('.login-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('login-form').style.display=tab==='login'?'block':'none';
+  document.getElementById('signup-form').style.display=tab==='signup'?'block':'none';
+}
+function handleLogin(){showToast('Welcome back, Arjun!','var(--teal)');setTimeout(()=>goto('account'),500)}
+function handleSignup(){showToast('Account created! Welcome aboard 🎉','var(--teal)');setTimeout(()=>goto('home'),500)}
+
+// ── BOOKING PAGE ───────────────────────────────
+function renderBookingPage(){
+  const j=state.selectedJourney||ROUTES[0];
+  const b=state.selectedBundle||BUNDLES[2];
+  const l=LANGUAGES.find(x=>x.code===state.selectedLang)||LANGUAGES[0];
+  const travel=j.price,ott=b.price,tax=Math.round((travel+ott)*.05),total=travel+ott+tax;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+  set('bs-journey-title',j.from+' → '+j.to+' '+(['🚆','✈️','🚌','🏨'][['train','flight','bus','hotel'].indexOf(j.mode)]||''));
+  set('bs-journey-meta',j.name+' · '+j.duration);
+  set('bs-bundle-title',b.name);
+  set('bs-pv-journey',j.from+' → '+j.to);
+  set('bs-travel','₹'+travel.toLocaleString());
+  set('bs-ott',ott?'₹'+ott:'Free');
+  set('bs-tax','₹'+tax);
+  set('bs-total','₹'+total.toLocaleString());
+}
+function confirmBooking(){
+  showToast('Booking confirmed! 🎉 Check your email.','var(--teal)');
+  setTimeout(()=>goto('session'),1500);
+}
+
+// ── SESSIONS ───────────────────────────────────
+function renderSessions(){
+  const c=document.getElementById('session-history');if(!c)return;
+  c.innerHTML=SESSIONS.map(s=>`
+    <div class="card p-4">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+        <div style="font-weight:600">${s.route}</div>
+        <span class="badge ${s.status==='active'?'badge-green':'badge-amber'}">${s.status==='active'?'● Active':'Completed'}</span>
+      </div>
+      <div class="text-xs text-muted mb-3">${s.train} · ${s.bundle}</div>
+      <div class="watch-bar"><div class="watch-fill" style="width:${s.status==='completed'?'100':'26'}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--text2);margin-top:.35rem"><span>Used: ${s.used}</span><span>Total: ${s.total}</span></div>
+      ${s.status==='active'?`<button class="btn btn-primary mt-3 w-full" style="font-size:.8rem;padding:.5rem" onclick="showToast('Top-up added!','var(--teal)')">+ Top Up</button>`:`<button class="btn btn-ghost mt-3 w-full" style="font-size:.8rem;padding:.5rem" onclick="showToast('Downloading receipt...','var(--indigo)')">Download Receipt</button>`}
+    </div>`).join('');
+}
+
+// ── TIMER ──────────────────────────────────────
+let timerSec=15735;
+function tickTimer(){
+  if(state.currentPage!=='session')return;
+  timerSec=Math.max(0,timerSec-1);
+  const h=Math.floor(timerSec/3600),m=Math.floor((timerSec%3600)/60),s=timerSec%60;
+  const el=document.getElementById('timer-val');
+  if(el)el.textContent=`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const circle=document.getElementById('timer-circle');
+  if(circle){const total=6*3600;const pct=timerSec/total;circle.style.strokeDashoffset=339*(1-pct)}
+}
+setInterval(tickTimer,1000);
+
+// ── MODE SHORTCUT ──────────────────────────────
+function selectModeAndGo(m){state.mode=m;goto('travel')}
+
+// ── INIT ──────────────────────────────────────
+renderHome();
+</script>
+</body>
+</html>
