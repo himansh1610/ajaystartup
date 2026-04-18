@@ -1,0 +1,106 @@
+{
+  "partners": [
+    {
+      "name": "IRCTC",
+      "type": "train",
+      "apiKey": "test-api-key-irctc-001",
+      "webhookUrl": null,
+      "isActive": true,
+      "defaultFreeMinutes": 120,
+      "contactEmail": "partner@irctc.co.in",
+      "createdAt": { "$date": "2026-04-01T00:00:00Z" },
+      "updatedAt": { "$date": "2026-04-01T00:00:00Z" }
+    },
+    {
+      "name": "OYO Hotels",
+      "type": "hotel",
+      "apiKey": "test-api-key-oyo-002",
+      "webhookUrl": null,
+      "isActive": true,
+      "defaultFreeMinutes": 180,
+      "contactEmail": "partner@oyo.com",
+      "createdAt": { "$date": "2026-04-01T00:00:00Z" },
+      "updatedAt": { "$date": "2026-04-01T00:00:00Z" }
+    }
+  ],
+  "users": [
+    {
+      "phone": "+919876543210",
+      "name": "Rahul Sharma",
+      "language": "hi",
+      "totalWatchMinutes": 0,
+      "createdAt": { "$date": "2026-04-10T10:00:00Z" },
+      "updatedAt": { "$date": "2026-04-10T10:00:00Z" }
+    },
+    {
+      "phone": "+919123456789",
+      "name": "Priya Patel",
+      "language": "gu",
+      "totalWatchMinutes": 45,
+      "createdAt": { "$date": "2026-04-11T08:30:00Z" },
+      "updatedAt": { "$date": "2026-04-11T08:30:00Z" }
+    }
+  ],
+  "contents": [
+    {
+      "title": "Mirzapur Season 1",
+      "description": "Crime drama set in Uttar Pradesh",
+      "type": "series_episode",
+      "language": "hi",
+      "genres": ["crime", "drama", "thriller"],
+      "durationSeconds": 3240,
+      "cloudflareVideoId": "cf-video-001-mirzapur",
+      "thumbnailUrl": "https://example.com/thumbs/mirzapur.jpg",
+      "ottSource": "ZEE5",
+      "isActive": true,
+      "totalViews": 0,
+      "totalWatchSeconds": 0,
+      "createdAt": { "$date": "2026-04-01T00:00:00Z" },
+      "updatedAt": { "$date": "2026-04-01T00:00:00Z" }
+    },
+    {
+      "title": "RRR",
+      "description": "Epic action drama",
+      "type": "movie",
+      "language": "te",
+      "genres": ["action", "drama"],
+      "durationSeconds": 10920,
+      "cloudflareVideoId": "cf-video-002-rrr",
+      "thumbnailUrl": "https://example.com/thumbs/rrr.jpg",
+      "ottSource": "Aha",
+      "isActive": true,
+      "totalViews": 0,
+      "totalWatchSeconds": 0,
+      "createdAt": { "$date": "2026-04-01T00:00:00Z" },
+      "updatedAt": { "$date": "2026-04-01T00:00:00Z" }
+    },
+    {
+      "title": "Scam 1992",
+      "description": "Story of Harshad Mehta",
+      "type": "series_episode",
+      "language": "hi",
+      "genres": ["biography", "drama"],
+      "durationSeconds": 3600,
+      "cloudflareVideoId": "cf-video-003-scam1992",
+      "thumbnailUrl": "https://example.com/thumbs/scam1992.jpg",
+      "ottSource": "SonyLIV",
+      "isActive": true,
+      "totalViews": 0,
+      "totalWatchSeconds": 0,
+      "createdAt": { "$date": "2026-04-01T00:00:00Z" },
+      "updatedAt": { "$date": "2026-04-01T00:00:00Z" }
+    }
+  ],
+  "bookings": [
+    {
+      "pnr": "PNR1234567890",
+      "travelDate": { "$date": "2026-04-20T06:00:00Z" },
+      "route": "Bhopal → Mumbai",
+      "class": "2A",
+      "passengerName": "Rahul Sharma",
+      "isUsed": false,
+      "createdAt": { "$date": "2026-04-15T00:00:00Z" },
+      "updatedAt": { "$date": "2026-04-15T00:00:00Z" }
+    }
+  ]
+}

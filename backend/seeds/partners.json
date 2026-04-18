@@ -1,0 +1,24 @@
+[
+  {
+    "name": "IRCTC",
+    "type": "train",
+    "apiKey": "test-api-key-irctc-001",
+    "webhookUrl": null,
+    "isActive": true,
+    "defaultFreeMinutes": 120,
+    "contactEmail": "partner@irctc.co.in",
+    "createdAt": { "$date": "2026-04-01T00:00:00Z" },
+    "updatedAt": { "$date": "2026-04-01T00:00:00Z" }
+  },
+  {
+    "name": "OYO Hotels",
+    "type": "hotel",
+    "apiKey": "test-api-key-oyo-002",
+    "webhookUrl": null,
+    "isActive": true,
+    "defaultFreeMinutes": 180,
+    "contactEmail": "partner@oyo.com",
+    "createdAt": { "$date": "2026-04-01T00:00:00Z" },
+    "updatedAt": { "$date": "2026-04-01T00:00:00Z" }
+  }
+]

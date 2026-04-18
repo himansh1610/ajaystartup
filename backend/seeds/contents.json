@@ -1,0 +1,50 @@
+[
+  {
+    "title": "Mirzapur Season 1",
+    "description": "Crime drama set in Uttar Pradesh",
+    "type": "series_episode",
+    "language": "hi",
+    "genres": ["crime", "drama", "thriller"],
+    "durationSeconds": 3240,
+    "cloudflareVideoId": "cf-video-001-mirzapur",
+    "thumbnailUrl": "https://example.com/thumbs/mirzapur.jpg",
+    "ottSource": "ZEE5",
+    "isActive": true,
+    "totalViews": 0,
+    "totalWatchSeconds": 0,
+    "createdAt": { "$date": "2026-04-01T00:00:00Z" },
+    "updatedAt": { "$date": "2026-04-01T00:00:00Z" }
+  },
+  {
+    "title": "RRR",
+    "description": "Epic action drama",
+    "type": "movie",
+    "language": "te",
+    "genres": ["action", "drama"],
+    "durationSeconds": 10920,
+    "cloudflareVideoId": "cf-video-002-rrr",
+    "thumbnailUrl": "https://example.com/thumbs/rrr.jpg",
+    "ottSource": "Aha",
+    "isActive": true,
+    "totalViews": 0,
+    "totalWatchSeconds": 0,
+    "createdAt": { "$date": "2026-04-01T00:00:00Z" },
+    "updatedAt": { "$date": "2026-04-01T00:00:00Z" }
+  },
+  {
+    "title": "Scam 1992",
+    "description": "Story of Harshad Mehta",
+    "type": "series_episode",
+    "language": "hi",
+    "genres": ["biography", "drama"],
+    "durationSeconds": 3600,
+    "cloudflareVideoId": "cf-video-003-scam1992",
+    "thumbnailUrl": "https://example.com/thumbs/scam1992.jpg",
+    "ottSource": "SonyLIV",
+    "isActive": true,
+    "totalViews": 0,
+    "totalWatchSeconds": 0,
+    "createdAt": { "$date": "2026-04-01T00:00:00Z" },
+    "updatedAt": { "$date": "2026-04-01T00:00:00Z" }
+  }
+]

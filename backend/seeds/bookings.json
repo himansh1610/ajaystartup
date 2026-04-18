@@ -1,0 +1,12 @@
+[
+  {
+    "pnr": "PNR1234567890",
+    "travelDate": { "$date": "2026-04-20T06:00:00Z" },
+    "route": "Bhopal → Mumbai",
+    "class": "2A",
+    "passengerName": "Rahul Sharma",
+    "isUsed": false,
+    "createdAt": { "$date": "2026-04-15T00:00:00Z" },
+    "updatedAt": { "$date": "2026-04-15T00:00:00Z" }
+  }
+]
